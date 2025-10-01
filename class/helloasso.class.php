@@ -5,7 +5,7 @@ class HelloassoHandler
     private $db;
     private $errors = array();
 
-    private $apiUrl = DOL_MAIN_URL_ROOT;
+    private $apiUrl = DOL_MAIN_URL_ROOT .'/api/index.php/';
     private $apiKey = '<APIKEY>';
     private $bid    = 1; // @TODO Put this in config (Bank Account Id)
 

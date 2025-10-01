@@ -3,15 +3,27 @@
 class HelloassoHandler
 {
     private $db;
-    private $errors = array();
-
-    private $apiUrl = DOL_MAIN_URL_ROOT .'/api/index.php/';
-    private $apiKey = '<APIKEY>';
+    private $apiKey;
+    private $apiUrl = DOL_MAIN_URL_ROOT .'/api/index.php/'; // @see $dolibarr_main_url_root
+    private $uid    = 1; // @TODO Put this in config (Super Admin Id)
     private $bid    = 1; // @TODO Put this in config (Bank Account Id)
 
     public function __construct($db)
     {
         $this->db = $db;
+
+        $userObj = new User($db);
+
+        if ($userObj->fetch($this->uid) > 0) {
+            $this->apiKey = $userObj->api_key;
+            if (empty($this->apiKey)) {
+                $this->log('Apikey introuvable pour le super admin (id='. $this->uid .')');
+                die;
+            }
+        } else {
+            $this->log('Utilisateur introuvable (id='. $this->uid .')');
+            die;
+        }
     }
 
     public function log($msg)
@@ -131,22 +143,22 @@ class HelloassoHandler
             'end_date'   => strtotime(date('Y-12-31', strtotime($membership->date))),
             'amount'     => $membership->amount,
             // 'fk_bank'    => $bankLineId, // Is not set into database, update subscription below...
-            'label'      => $membership->name,
+            'label'      => $membership->name .' - '. $membership->id,
         ];
         
         $subscriptionId = $this->callApi('POST', "members/$mid/subscriptions", json_encode($subscription));
         $this->log("Adhésion validée: $subscriptionId");
 
         $bankLine = [
-            'date'   => strtotime(date('Y-m-d')),
-            'type'   => 'VIR',
+            'date'   => strtotime($membership->date),
+            'type'   => $membership->method,
             'amount' => $membership->amount,
-            'label'  => "HelloAsso",
+            'label'  => $membership->name .' - '. $membership->id,
         ];
 
         $bankLineId = $this->callApi('POST', "bankaccounts/$this->bid/lines", json_encode($bankLine));
         $this->log("Ligne ajoutée au compte bancaire: $bankLineId");
-
+        
         $bankLink = [
             'type'   => 'member',
             'url'    => $this->apiUrl .'adherents/card.php?rowid=',
@@ -217,10 +229,5 @@ class HelloassoHandler
         curl_close($curl);
 
         return $result;
-    }
-
-    public function getErrors()
-    {
-        return $this->errors;
     }
 }

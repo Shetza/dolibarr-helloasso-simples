@@ -18,4 +18,16 @@ class HelloassoMembership
         $this->method = 'CB';
         $this->member = $member;
     }
+
+    public function toJson(): string
+    {
+        return json_encode([
+            'id'        => $this->id,
+            'name'      => $this->name,
+            'amount'    => $this->amount,
+            'date'      => $this->date,
+            'method'    => $this->method,
+            'member'    => $this->member ? $this->member->email : null,
+        ]);
+    }
 }

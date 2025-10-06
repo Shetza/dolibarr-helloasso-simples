@@ -1,0 +1,85 @@
+### Mock the HelloAsso webhook
+POST {{baseUrl}}/custom/helloasso/webhook.php
+Accept: application/json
+
+{
+  "data": {
+    "payer": {
+      "email": "johann@nonmerci.ovh",
+      "country": "FRA",
+      "firstName": "Johann",
+      "lastName": "XXXXXXX"
+    },
+    "items": [
+      {
+        "name": "Adh\u00e9sion annuelle \u00e0 prix libre",
+        "user": {
+          "firstName": "Johann",
+          "lastName": "XXXXXXX"
+        },
+        "priceCategory": "Pwyw",
+        "minAmount": 0,
+        "customFields": [
+          {
+            "id": 11,
+            "name": "Num\u00e9ro de t\u00e9l\u00e9phone ",
+            "type": "Phone",
+            "answer": "0700000000"
+          },
+          {
+            "id": 12,
+            "name": "E-mail",
+            "type": "TextInput",
+            "answer": "johann@nonmerci.ovh"
+          },
+          {
+            "id": 13,
+            "name": "Adresse",
+            "type": "TextInput",
+            "answer": "address"
+          },
+          {
+            "id": 14,
+            "name": "Code postal",
+            "type": "Zipcode",
+            "answer": "zip"
+          },
+          {
+            "id": 15,
+            "name": "Ville",
+            "type": "TextInput",
+            "answer": "city"
+          }
+        ],
+        "qrCode": "MTUyMTAwMTIzOjYzODk1MzYwNzcwMzcxMjQ4MQ==",
+        "tierDescription": "Pensez \u00e0 valider la quantit\u00e9 souhait\u00e9e :)",
+        "tierId": 1,
+        "id": 1,
+        "amount": 0,
+        "type": "Membership",
+        "initialAmount": 0,
+        "state": "Processed"
+      }
+    ],
+    "amount": {
+      "total": 0,
+      "vat": 0,
+      "discount": 0
+    },
+    "id": 1,
+    "date": "2025-10-06T15:19:30.3712481+02:00",
+    "formSlug": "en-2025-re-adherez-a-l-usine-vivante2025",
+    "formType": "Membership",
+    "organizationName": "L'Usine Vivante",
+    "organizationSlug": "l-usine-vivante",
+    "organizationType": "Association1901Rig",
+    "organizationIsUnderColucheLaw": false,
+    "meta": {
+      "createdAt": "2025-10-06T15:19:30.3712481+02:00",
+      "updatedAt": "2025-10-06T15:19:31.1856341+02:00"
+    },
+    "isAnonymous": false,
+    "isAmountHidden": false
+  },
+  "eventType": "Order"
+}

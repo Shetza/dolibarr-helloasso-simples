@@ -36,6 +36,117 @@ class HelloassoHandler
     /**
      * 
      */
+    public function findOrMakeDolibarrThirdparty(HelloassoMember $member): int|null
+    {
+        if ($result = $this->getDolibarrThirdparty($member)) {
+            $this->updateDolibarrThirdparty($result['id'], $member, $result);
+            return $result['id'];
+        }
+        
+        if ($this->createDolibarrThirdparty($member)) {
+            $result = $this->getDolibarrThirdparty($member);
+            return $result['id'];
+        }
+
+        return null;
+    }
+
+    /**
+     * @see http://dolibarr/api/index.php/explorer/#!/thirdparties/listThirdparties
+     */
+    public function getDolibarrThirdparty(HelloassoMember $member): array|null
+    {
+        $params = [
+            'sqlfilters' => "(t.email:=:'". $member->email ."')",
+            'limit' => 1,
+            'sortfield' => "rowid",
+        ];
+        $result = $this->callApi('GET', 'thirdparties', $params);
+
+        if (isset($result["error"]) && $result["error"]["code"] >= "300") {
+            if ($result["error"]["code"] == "404") {
+                return null;
+            } else {
+                $this->log('('. $member->email .'): '. json_encode($result));
+                return null;
+            }
+        }
+
+        return $result[0];
+    }
+
+    /**
+     * Create Dolibarr Thirdparty from specified member.
+     * @see http://dolibarr/api/index.php/explorer/#!/thirdparties/createThirdparties
+     */
+    public function createDolibarrThirdparty(HelloassoMember $member): void
+    {
+        $data = [
+            'entity'        => '1',
+            'email'         => $member->email,
+            'name'          => $member->fullName,
+            'client'        => 1, // @TODO Put this in config (Prospect / Client : Client)
+            'code_client'   => "auto",
+            'array_options' => [
+                'options_statut'    => $member->status,
+                'options_massif'    => $member->massif,
+                'options_cotis'     => $member->period,
+            ],
+        ];
+        if ($address = $member->address) $data['address'] = $address;
+        if ($zipCode = $member->zipCode) $data['zip'] = $zipCode;
+        if ($city = $member->city) $data['town'] = $city;
+        if ($country = $member->country) $data['country_code'] = $country;
+        if ($phone = $member->phone) $data['phone'] = $phone;
+
+        // Hook/extension point here ?
+        $result = $this->callApi('POST', 'thirdparties', json_encode($data));
+
+        if (isset($result["error"]) && $result["error"]["code"] >= "300") {
+            $this->log('('. $member->email .'): '. json_encode($result));
+        }
+    }
+
+    /**
+     * Update Dolibarr Thirdparty from specified member.
+     * @see http://dolibarr/api/index.php/explorer/#!/thirdparties/updateThirdparties
+     */
+    public function updateDolibarrThirdparty(int $mid, HelloassoMember $member, array $thirdparty): void
+    {
+         // Concat periods (year after year)
+        $periods = $thirdparty['array_options']['options_cotis'] ?? '';
+        if(strpos($periods, $member->period) === false) {
+            $periods .= ','.$member->period;
+        }
+
+        $data = [
+            'array_options' => [
+                'options_statut'    => $member->status,
+                'options_massif'    => $member->massif,
+                'options_cotis'     => $periods,
+            ],
+        ];
+        if ($address = $member->address) $data['address'] = $address;
+        if ($zipCode = $member->zipCode) $data['zip'] = $zipCode;
+        if ($city = $member->city) $data['town'] = $city;
+        if ($country = $member->country) $data['country_code'] = $country;
+        if ($phone = $member->phone) $data['phone'] = $phone;
+
+        // Hook/extension point here ?
+        $this->log('('. $mid .'/'. $member->email .') >> '. json_encode($data));
+
+        if (!empty($data)) {
+            $result = $this->callApi('PUT', "thirdparties/$mid", json_encode($data));
+
+            if (isset($result["error"]) && $result["error"]["code"] >= "300") {
+                $this->log('('. $member->email .'): '. json_encode($result));
+            }
+        }
+    }
+
+    /**
+     * 
+     */
     public function findOrMakeDolibarrMember(HelloassoMember $member): int|null
     {
         if ($result = $this->getDolibarrMember($member)) {
@@ -88,7 +199,7 @@ class HelloassoHandler
             'login'  => $member->fullName,
             'firstname' => $member->firstName,
             'lastname'  => $member->lastName,
-            'array_options' => array(),
+            'array_options' => [],
         ];
         if ($address = $member->address) $data['address'] = $address;
         if ($zipCode = $member->zipCode) $data['zip'] = $zipCode;
@@ -177,6 +288,88 @@ class HelloassoHandler
         $this->callApi('PUT', "subscriptions/$subscriptionId", json_encode($subscription));
 
         return $subscriptionId;
+    }
+
+    /**
+     * Create Invoice, and Payment from current Membership.
+     * 
+     * @see http://dolibarr/api/index.php/explorer/#!/invoices/createInvoices
+     * @see http://dolibarr/api/index.php/explorer/#!/invoices/invoicesAddPayment
+     * @see http://dolibarr/api/index.php/explorer/#!/invoices/invoicesValidate
+     */
+    public function createDolibarrInvoice(int $mid, HelloassoMembership $membership): int|null
+    {
+        $invoice = [
+            'socid'             => $mid,
+            'cond_reglement_id' => "1", // @TODO Put this in config ("A RECEPTION")
+            'mode_reglement_id' => "6", // @TODO Put this in config ("CB")
+            'fk_account'        => "2", // @TODO Put this in config ("COMPTE")
+            'ref_client'        => $membership->name .' '. $membership->member->period,
+            'lines'             => [
+                [
+                    'rang'          => "1",
+                    'qty'           => 1,
+                    'fk_product'    => $membership->analytic,
+                    'subprice'      => $membership->amount,
+                    'total_ht'      => $membership->amount,
+                    'total_ttc'     => $membership->amount,
+                    'marque_tx'     => 100,
+                ]
+            ],
+        ];
+        $result = $this->callApi('POST', 'invoices', json_encode($invoice));
+
+        if (isset($result["error"]) && $result["error"]["code"] >= "300" || empty($result)) {
+            $this->log('('. $membership->member->email .'): '. json_encode($result));
+            return null;
+        }
+
+        $invoiceId = $result;
+        $this->log("Facture créée: $invoiceId");
+        
+        $validate = $this->callApi('POST', "invoices/$invoiceId/validate", json_encode($invoice));
+        $this->log('Facture validée: '. json_encode($validate));
+
+        $payment = [
+            'datepaye'          => $validate['date_validation'],
+            'closepaidinvoices' => "yes",
+            'paymentid'         => "6", // @TODO Put this in config ("CB")
+            'accountid'         => "2", // @TODO Put this in config ("COMPTE")
+        ];
+        $paymentId = $this->callApi('POST', "invoices/$invoiceId/payments", json_encode($payment));
+        $this->log("Paiement crée: $paymentId");
+
+        /**
+        // Get and save pdf invoice from Dolibarr.
+        $invoiceName = $validate['ref'] .'.pdf';
+        $invoiceContent = $this->callApi('GET', 'documents/download', ['modulepart' => 'facture', 'original_file' => $validate['ref'] .'/'. $invoiceName]);
+
+        $invoicePath = BASE_PATH .'/dolibarr_receipts/'. $invoiceName;
+        file_put_contents($invoicePath, base64_decode($invoiceContent['content']));
+
+        // Send invoice by email.
+        if ($Membership->Category()->SimplesEmailTemplate) {
+            $template = EmailTemplate::getByCode($Membership->Category()->SimplesEmailTemplate);
+            $email = $template->getEmail();
+            $email->setTo($Membership->Creator()->Email);
+            $email->setBcc(SiteConfig::current_site_config()->ContactEmail);
+            $email->attachFile($invoicePath);
+            $email->populateTemplate([
+                'Membership' => $Membership,
+            ]);
+            $res = $email->send();
+            if ($res === false) {
+                SS_Log::Log(__CLASS__.'.'.__FUNCTION__.'('. $Membership->ID .' / '. $Membership->Creator()->Email .'): '. json_encode($res), SS_Log::ERR);
+                return false;
+            }
+        }
+
+        $Membership->BillReference = $DolibarrInvoice['id'];
+        $Membership->write();
+        $Membership->addTransactionHistory($invoiceName, "Facture générée et envoyée");
+        */
+
+        return $validate['ref'];
     }
 
     private function callApi($method, $url, $data = false)

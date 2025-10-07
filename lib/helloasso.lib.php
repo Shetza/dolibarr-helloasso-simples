@@ -11,7 +11,7 @@ function helloasso_process_payload($db, $payload)
 
     $data   = $payload['data'];
     $member = new HelloassoMember($data['payer']);
-    $mid    = $h->findOrMakeDolibarrMember($member);
+    $mid    = $h->findOrMakeDolibarrThirdparty($member); // Or findOrMakeDolibarrMember (may be configurable ?)
 
     if ($mid == null) {
         $mid = "Can't get of create Member: " . $member->toJson();
@@ -25,12 +25,13 @@ function helloasso_process_payload($db, $payload)
         if ($item['type'] == 'Membership')
         {
             $membership = new HelloassoMembership($item, $data['payments'][0] ?? [], $member);
-            $sid = $h->createDolibarrSubscription($mid, $membership);
+            $sid = $h->createDolibarrInvoice($mid, $membership); // Or createDolibarrSubscription (may be configurable ?)
 
-            if ($sid == null) {
+            if ($sid != null) {
+                $h->updateDolibarrThirdparty($mid, $member, $h->getDolibarrThirdparty($member)); // As new HelloassoMembership may update members attributes
+            } else {
                 $sid = "Can't create Membership: ". $membership->toJson();
                 $h->log($sid);
-                $subscriptions[] = $sid;
             }
 
             $subscriptions[] = $sid;

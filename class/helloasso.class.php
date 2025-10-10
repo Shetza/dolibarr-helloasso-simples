@@ -291,6 +291,32 @@ class HelloassoHandler
     }
 
     /**
+     * Get Invoice by reference
+     * 
+     * @see https://adherents.syndicat-simples.org/api/index.php/explorer/#!/invoices/listInvoices
+     */
+    public function getDolibarrInvoice(string $reference): array|null
+    {
+        $params = [
+            'sqlfilters' => "(t.note_private:like:'%". $reference ."')",
+            'limit' => 1,
+            'sortfield' => "rowid",
+        ];
+        $result = $this->callApi('GET', 'invoices', $params);
+
+        if (isset($result["error"]) && $result["error"]["code"] >= "300") {
+            if ($result["error"]["code"] == "404") {
+                return null;
+            } else {
+                $this->log('('. $reference .'): '. json_encode($result));
+                return null;
+            }
+        }
+
+        return $result[0];
+    }
+
+    /**
      * Create Invoice, and Payment from current Membership.
      * 
      * @see http://dolibarr/api/index.php/explorer/#!/invoices/createInvoices
@@ -305,6 +331,7 @@ class HelloassoHandler
             'mode_reglement_id' => "6", // @TODO Put this in config ("CB")
             'fk_account'        => "2", // @TODO Put this in config ("COMPTE")
             'ref_client'        => $membership->name .' '. $membership->member->period,
+            'note_private'      => "Helloasso ID: ". $membership->id,
             'lines'             => [
                 [
                     'rang'          => "1",

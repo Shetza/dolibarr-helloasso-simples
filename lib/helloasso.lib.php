@@ -24,6 +24,9 @@ function helloasso_process_payload($db, $payload)
     {
         if ($item['type'] == 'Membership')
         {
+            $exist = $h->getDolibarrInvoice($item['id']);
+            if (!empty($exist)) continue;
+
             $membership = new HelloassoMembership($item, $data['payments'][0] ?? [], $member);
             $sid = $h->createDolibarrInvoice($mid, $membership); // Or createDolibarrSubscription (may be configurable ?)
 

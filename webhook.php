@@ -32,11 +32,17 @@ if (!empty($secret)) {
     }
 }
 
+$status = '';
+
 // Traitement du webhook
-$result = helloasso_process_payload($db, $payload);
+try {
+    $result = helloasso_process_payload($db, $payload);
+    $status = 'OK';
+} catch(Exception $e) {
+    $result = $e->getMessage();
+    $status = 'ERROR';
+}
 
 // Réponse
 header('Content-Type: application/json');
-echo json_encode(['status' => 'ok', 'result' => $result]);
-
-
+echo json_encode(['status' => $status, 'result' => $result]);

@@ -31,7 +31,7 @@ function helloasso_process_payload($db, $payload)
             $sid = $h->createDolibarrInvoice($mid, $membership); // Or createDolibarrSubscription (may be configurable ?)
 
             if ($sid != null) {
-                $h->updateDolibarrThirdparty($mid, $member, $h->getDolibarrThirdparty($member)); // As new HelloassoMembership may update members attributes
+                $h->updateDolibarrThirdparty($mid, $membership->member, $h->getDolibarrThirdparty($member)); // As new HelloassoMembership may update members attributes
             } else {
                 $sid = "Can't create Membership: ". $membership->toJson();
                 $h->log($sid);

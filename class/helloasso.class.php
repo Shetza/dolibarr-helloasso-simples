@@ -39,7 +39,7 @@ class HelloassoHandler
     public function findOrMakeDolibarrThirdparty(HelloassoMember $member): int|null
     {
         if ($result = $this->getDolibarrThirdparty($member)) {
-            $this->updateDolibarrThirdparty($result['id'], $member, $result);
+            // $this->updateDolibarrThirdparty($result['id'], $member, $result);
             return $result['id'];
         }
         
@@ -113,17 +113,20 @@ class HelloassoHandler
      */
     public function updateDolibarrThirdparty(int $mid, HelloassoMember $member, array $thirdparty): void
     {
-         // Concat periods (year after year)
+        $status = $member->status ?: ($thirdparty['array_options']['options_statut'] ?? '');
+        $massif = $member->massif ?: ($thirdparty['array_options']['options_massif'] ?? '');
+
+        // Concat periods (year after year)
         $periods = $thirdparty['array_options']['options_cotis'] ?? '';
         if(strpos($periods, $member->period) === false) {
-            $periods .= ','.$member->period;
+            $periods .= ','. $member->period;
         }
 
         $data = [
             'array_options' => [
-                'options_statut'    => $member->status,
-                'options_massif'    => $member->massif,
-                'options_cotis'     => $periods,
+                'options_statut' => $status,
+                'options_massif' => $massif,
+                'options_cotis'  => $periods,
             ],
         ];
         if ($address = $member->address) $data['address'] = $address;
@@ -323,7 +326,7 @@ class HelloassoHandler
      * @see http://dolibarr/api/index.php/explorer/#!/invoices/invoicesAddPayment
      * @see http://dolibarr/api/index.php/explorer/#!/invoices/invoicesValidate
      */
-    public function createDolibarrInvoice(int $mid, HelloassoMembership $membership): int|null
+    public function createDolibarrInvoice(int $mid, HelloassoMembership $membership): string|null
     {
         $invoice = [
             'socid'             => $mid,

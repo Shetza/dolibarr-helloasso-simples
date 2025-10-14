@@ -9,20 +9,23 @@ class HelloassoMembership
     public $method;
     public $member;
 
+    /**
+     * @deprecated Get associated product from Dolibarr service name
+     */
     public $analytic;
 
     public function __construct(array $item, array $payment, HelloassoMember $member)
     {
         $this->id     = $item['id'];
-        $this->name   = "HelloAsso - ". $item['name'];
-        $this->amount = intval($item['amount']) / 100.0; // HelloAsso amounts are in cents
+        $this->name   = $item['name'];
+        $this->amount = intval($item['amount']) / 100.0; // Helloasso amounts are in cents
         $this->date   = !empty($payment['date']) ? substr($payment['date'],0,10) : date('Y-m-d');
         $this->method = 'CB';
         $this->member = $member;
 
-        $this->setAnalytic($item['name']); // Update membership analytic (from item name)
+        // $this->setAnalytic($item['name']); // @deprecated Get associated product from Dolibarr service name
 
-        $this->member->setStatus($item['name']); // Update members status (from item name)
+        // $this->member->setStatus($item['name']); // @deprecated Get associated status from Dolibarr service
         $this->member->setPeriod($this->date);   // Update members period (from payment date)
 
         // Update members address (from item custom fields)
@@ -46,8 +49,13 @@ class HelloassoMembership
         }
     }
 
+    /**
+     * @deprecated Get associated product from Dolibarr service name
+     */
     public function setAnalytic(string $name): int
     {
+        throw new Exception("@deprecated Get associated product from Dolibarr service name");
+
         // @TODO Get this from Dolibarr ?
         if (strpos($name, 'Symptahisant') !== false) {
             return $this->analytic = 110;
@@ -62,8 +70,13 @@ class HelloassoMembership
         return $this->analytic = 9; // @TODO Put this in config (Default don-product id)
     }
 
+    /**
+     * @deprecated Status doesn't exist in HelloassoMembership
+     */
     public function setStatus(string $name): void
     {
+        throw new Exception("@deprecated Status doesn't exist in HelloassoMembership");
+
         if (strpos($name, 'PPAM') !== false) {
             $this->status = "adherentspro";
         } else {
@@ -80,7 +93,7 @@ class HelloassoMembership
             'date'      => $this->date,
             'method'    => $this->method,
             'member'    => $this->member ? $this->member->email : null,
-            'analytic'  => $this->analytic,
+            // 'analytic'  => $this->analytic, // @deprecated Get associated product from Dolibarr service name
         ]);
     }
 }

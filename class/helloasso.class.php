@@ -257,7 +257,7 @@ class HelloassoHandler
             'end_date'   => strtotime(date('Y-12-31', strtotime($membership->date))),
             'amount'     => $membership->amount,
             // 'fk_bank'    => $bankLineId, // Is not set into database, update subscription below...
-            'label'      => $membership->name .' - '. $membership->id,
+            'label'      => "Helloasso - ". $membership->name .' - '. $membership->id,
         ];
         
         $subscriptionId = $this->callApi('POST', "members/$mid/subscriptions", json_encode($subscription));
@@ -267,7 +267,7 @@ class HelloassoHandler
             'date'   => strtotime($membership->date),
             'type'   => $membership->method,
             'amount' => $membership->amount,
-            'label'  => $membership->name .' - '. $membership->id,
+            'label'  => "Helloasso - ". $membership->name .' - '. $membership->id,
         ];
 
         $bankLineId = $this->callApi('POST', "bankaccounts/$this->bid/lines", json_encode($bankLine));
@@ -294,9 +294,33 @@ class HelloassoHandler
     }
 
     /**
+     * @see http://dolibarr/api/index.php/explorer/#!/products/listProducts
+     */
+    public function getDolibarrProduct(string $label): array|null
+    {
+        $params = [
+            'sqlfilters' => "(t.label:=:'$label')",
+            'limit' => 1,
+            'sortfield' => "t.ref",
+        ];
+        $result = $this->callApi('GET', 'products', $params);
+
+        if (isset($result["error"]) && $result["error"]["code"] >= "300") {
+            if ($result["error"]["code"] == "404") {
+                return null;
+            } else {
+                $this->log('('. $label .'): '. json_encode($result));
+                return null;
+            }
+        }
+
+        return $result[0];
+    }
+
+    /**
      * Get Invoice by reference
      * 
-     * @see https://adherents.syndicat-simples.org/api/index.php/explorer/#!/invoices/listInvoices
+     * @see http://dolibarr/api/index.php/explorer/#!/invoices/listInvoices
      */
     public function getDolibarrInvoice(string $reference): array|null
     {
@@ -328,18 +352,28 @@ class HelloassoHandler
      */
     public function createDolibarrInvoice(int $mid, HelloassoMembership $membership): string|null
     {
+        // Get product to associate with invoice
+        $product = $this->getDolibarrProduct($membership->name);
+        if (empty($product)) {
+            $this->log('('. $membership->name .'): '. json_encode($product));
+            $productId = 9; // @TODO Put this in config (Default don-product id)
+        } else {
+            $productId = $product['id'];
+            $membership->member->status = $product['array_options']['options_status']; // Update member status from product custom field
+        }
+
         $invoice = [
             'socid'             => $mid,
             'cond_reglement_id' => "1", // @TODO Put this in config ("A RECEPTION")
             'mode_reglement_id' => "6", // @TODO Put this in config ("CB")
             'fk_account'        => "2", // @TODO Put this in config ("COMPTE")
-            'ref_client'        => $membership->name .' '. $membership->member->period,
+            'ref_client'        => "Helloasso - ". $membership->name .' '. $membership->member->period,
             'note_private'      => "Helloasso ID: ". $membership->id,
             'lines'             => [
                 [
                     'rang'          => "1",
                     'qty'           => 1,
-                    'fk_product'    => $membership->analytic,
+                    'fk_product'    => $productId,
                     'subprice'      => $membership->amount,
                     'total_ht'      => $membership->amount,
                     'total_ttc'     => $membership->amount,

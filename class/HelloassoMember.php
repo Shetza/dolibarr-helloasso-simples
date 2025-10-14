@@ -57,8 +57,13 @@ class HelloassoMember
         $this->massif = $list[$massif] ?: $massif;
     }
 
+    /**
+     * @deprecated Get associated status from Dolibarr service
+     */
     public function setStatus(string $name): void
     {
+        throw new Exception("@deprecated Get associated status from Dolibarr service");
+
         // @TODO Get this from Dolibarr ?
         if (strpos($name, 'PPAM') !== false) {
             $this->status = "adherentspro";

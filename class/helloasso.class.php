@@ -57,7 +57,7 @@ class HelloassoHandler
     public function getDolibarrThirdparty(HelloassoMember $member): array|null
     {
         $params = [
-            'sqlfilters' => "(t.email:=:'". $member->email ."')",
+            'sqlfilters' => "(t.email:=:'". $member->email ."') or (ef.emailperso:=:'". $member->email ."')",
             'limit' => 1,
             'sortfield' => "rowid",
         ];

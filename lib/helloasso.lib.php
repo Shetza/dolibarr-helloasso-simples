@@ -14,7 +14,7 @@ function helloasso_process_payload($db, $payload)
     $mid    = $h->findOrMakeDolibarrThirdparty($member); // Or findOrMakeDolibarrMember (may be configurable ?)
 
     if ($mid == null) {
-        $mid = "Can't get of create Member: " . $member->toJson();
+        $mid = "Can't get or create Member: " . $member->toJson();
         $h->log($mid);
     }
 

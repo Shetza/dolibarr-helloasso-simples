@@ -12,8 +12,8 @@ class HelloassoHandler
     {
         $this->db = $db;
 
-        if (!empty($conf->global->HELLOASSO_DEFAULT_USER_ID)) {
-            $this->uid = $conf->global->HELLOASSO_DEFAULT_USER_ID;
+        if ($default_user_id = getDolGlobalInt('HELLOASSO_DEFAULT_USER_ID')) {
+            $this->uid = $default_user_id;
         }
 
         $userObj = new User($db);
@@ -28,6 +28,8 @@ class HelloassoHandler
             $this->log('Utilisateur introuvable (id='. $this->uid .')');
             die;
         }
+
+        $this->log('Utilisateur valide (id='. $this->uid .')');
     }
 
     public function log($msg)

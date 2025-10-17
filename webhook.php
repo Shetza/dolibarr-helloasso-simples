@@ -16,13 +16,6 @@ require_once __DIR__ . '/class/HelloassoMember.php';
 require_once __DIR__ . '/class/HelloassoMembership.php';
 require_once __DIR__ . '/lib/helloasso.lib.php';
 
-if (!empty($_POST['test'])) {
-    dol_syslog("HelloAsso Test Webhook triggered");
-    header('Content-Type: application/json');
-    echo json_encode(['status' => 'OK', 'result' => "Webhook test received successfully."]);
-    exit;
-}
-
 // Récupération du payload brut
 $raw = file_get_contents('php://input');
 $payload = json_decode($raw, true);

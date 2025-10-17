@@ -5,8 +5,10 @@ function helloasso_process_payload($db, $payload)
     $h = new HelloassoHandler($db);
     $h->log('Received payload: ' . json_encode($payload));
 
+    if (empty($payload)) throw new Exception("Can't parse payload");
+
     // Get Event / only consider Order events.
-    $event = $payload['eventType'];
+    $event = @$payload['eventType'];
     if ($event != 'Order') return true;
 
     $data   = $payload['data'];

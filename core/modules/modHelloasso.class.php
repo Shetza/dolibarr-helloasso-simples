@@ -34,7 +34,7 @@ class modHelloasso extends DolibarrModules
         $this->dirs = array('helloasso/temp');
 
         // Define module pages (if needed)
-        $this->config_page_url = array('admin_helloasso.php@helloasso');
+        $this->config_page_url = array('helloasso.php@helloasso');
 
         // Hooks: none specific (we expose a webhook endpoint instead)
         $this->module_parts = array(

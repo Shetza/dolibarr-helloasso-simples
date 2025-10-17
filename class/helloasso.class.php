@@ -5,12 +5,16 @@ class HelloassoHandler
     private $db;
     private $apiKey;
     private $apiUrl = DOL_MAIN_URL_ROOT .'/api/index.php/'; // @see $dolibarr_main_url_root
-    private $uid    = 1; // @TODO Put this in config (Super Admin Id)
+    private $uid    = 1;
     private $bid    = 1; // @TODO Put this in config (Bank Account Id)
 
     public function __construct($db)
     {
         $this->db = $db;
+
+        if (!empty($conf->global->HELLOASSO_DEFAULT_USER_ID)) {
+            $this->uid = $conf->global->HELLOASSO_DEFAULT_USER_ID;
+        }
 
         $userObj = new User($db);
 

@@ -26,7 +26,7 @@ class modHelloasso extends DolibarrModules
         $this->module_position = '90';
         $this->name = 'HelloAsso';
         $this->description = 'Module permettant de gérer les webhooks HelloAsso.';
-        $this->version = '1.0.0';
+        $this->version = '1.0.1';
         $this->const_name = 'MAIN_MODULE_HELLOASSO';
         $this->picto = 'generic';
 

@@ -304,8 +304,9 @@ class HelloassoHandler
      */
     public function getDolibarrProduct(string $label): array|null
     {
+        $labelSafe = addslashes($label);
         $params = [
-            'sqlfilters' => "(t.label:=:'$label')",
+            'sqlfilters' => "(t.label:=:'$labelSafe')",
             'limit' => 1,
             'sortfield' => "t.ref",
         ];

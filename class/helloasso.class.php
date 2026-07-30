@@ -31,7 +31,7 @@ class HelloassoHandler
             die;
         }
 
-        $this->log('Utilisateur valide (id='. $this->uid .')');
+        // $this->log('Utilisateur valide (id='. $this->uid .')');
     }
 
     public function log($msg)
@@ -48,12 +48,12 @@ class HelloassoHandler
     {
         if ($result = $this->getDolibarrThirdparty($member)) {
             // $this->updateDolibarrThirdparty($result['id'], $member, $result);
-            return $result['id'];
+            return (int) $result['id'];
         }
         
         if ($this->createDolibarrThirdparty($member)) {
             $result = $this->getDolibarrThirdparty($member);
-            return $result['id'];
+            return (int) $result['id'];
         }
 
         return null;
@@ -304,11 +304,10 @@ class HelloassoHandler
     /**
      * @see http://dolibarr/api/index.php/explorer/#!/products/listProducts
      */
-    public function getDolibarrProduct(string $label): array|null
+    public function getDolibarrProduct(?string $label = null): array|null
     {
-        $labelSafe = addslashes($label);
         $params = [
-            'sqlfilters' => "(t.label:=:'$labelSafe')",
+            'sqlfilters' => "(t.label:=:'$label')",
             'limit' => 1,
             'sortfield' => "t.ref",
         ];

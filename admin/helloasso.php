@@ -20,10 +20,12 @@ if ($action == 'update') {
     $webhook_secret = GETPOST('HELLOASSO_WEBHOOK_SECRET', 'alpha');
     $api_key = GETPOST('HELLOASSO_API_KEY', 'alpha');
     $default_user_id = GETPOST('HELLOASSO_DEFAULT_USER_ID', 'int');
+    $default_donation = GETPOST('HELLOASSO_DEFAULT_DONATION_LABEL', 'alpha');
 
     dolibarr_set_const($db, "HELLOASSO_WEBHOOK_SECRET", $webhook_secret, 'chaine', 0, '', $conf->entity);
     dolibarr_set_const($db, "HELLOASSO_API_KEY", $api_key, 'chaine', 0, '', $conf->entity);
     dolibarr_set_const($db, "HELLOASSO_DEFAULT_USER_ID", $default_user_id, 'chaine', 0, '', $conf->entity);
+    dolibarr_set_const($db, "HELLOASSO_DEFAULT_DONATION_LABEL", $default_donation, 'chaine', 0, '', $conf->entity);
 
     setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
 }
@@ -32,6 +34,7 @@ if ($action == 'update') {
 $webhook_secret = getDolGlobalString('HELLOASSO_WEBHOOK_SECRET');
 $api_key = getDolGlobalString('HELLOASSO_API_KEY');
 $default_user_id = getDolGlobalInt('HELLOASSO_DEFAULT_USER_ID');
+$default_donation = getDolGlobalString('HELLOASSO_DEFAULT_DONATION_LABEL');
 
 $webhook_url = DOL_MAIN_URL_ROOT.'/custom/helloasso/webhook.php';
 
@@ -52,7 +55,7 @@ print '</tr>';
 
 // URL Webhook (readonly)
 print '<tr class="oddeven">';
-print '<td>'.$langs->trans("Webhook URL").'</td>';
+print '<td>'.$langs->trans("Webhook URL (information)").'</td>';
 print '<td><input type="text" readonly value="'.$webhook_url.'" class="quatrevingtpercent"></td>';
 print '</tr>';
 
@@ -72,6 +75,12 @@ print '</tr>';
 print '<tr class="oddeven">';
 print '<td><label for="HELLOASSO_DEFAULT_USER_ID">'.$langs->trans("Default Dolibarr User ID").'</label></td>';
 print '<td><input type="number" name="HELLOASSO_DEFAULT_USER_ID" value="'.$default_user_id.'" min="1" class="maxwidth100"></td>';
+print '</tr>';
+
+// Identifiant donation product
+print '<tr class="oddeven">';
+print '<td><label for="HELLOASSO_DEFAULT_DONATION_LABEL">'.$langs->trans("Default Dolibarr Donation Label").'</label></td>';
+print '<td><input type="text" name="HELLOASSO_DEFAULT_DONATION_LABEL" value="'.$default_donation.'" class="quatrevingtpercent"></td>';
 print '</tr>';
 
 print '</table>';

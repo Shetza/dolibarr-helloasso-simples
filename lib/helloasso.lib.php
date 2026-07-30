@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 function helloasso_process_payload($db, $payload)
 {
     $h = new HelloassoHandler($db);
@@ -8,10 +10,14 @@ function helloasso_process_payload($db, $payload)
     if (empty($payload)) throw new Exception("Can't parse payload");
 
     // Get Event / only consider Order events.
-    $event = @$payload['eventType'];
-    if ($event != 'Order') return true;
+    if (@$payload['eventType'] !== 'Order') return true;
 
-    $data   = $payload['data'];
+    $data = $payload['data'];
+
+    // Déjà importé ?
+    $exist = $h->getDolibarrInvoice($data['id']);
+    if (!empty($exist)) return [];
+
     $member = new HelloassoMember($data['payer']);
     $mid    = $h->findOrMakeDolibarrThirdparty($member); // Or findOrMakeDolibarrMember (may be configurable ?)
 
@@ -20,33 +26,49 @@ function helloasso_process_payload($db, $payload)
         $h->log($mid);
     }
 
-    $subscriptions = [];
+    $items = [];
 
     foreach ($data['items'] as $item)
     {
-        if ($item['type'] == 'Membership')
+        switch ($item['type'])
         {
-            $exist = $h->getDolibarrInvoice($item['id']);
-            if (!empty($exist)) continue;
+            case 'Membership':
+                $helloItem = new HelloassoMembership($item, $data['date'], $member);
+                $h->updateDolibarrThirdparty($mid, $helloItem->member, $h->getDolibarrThirdparty($member));
+                break;
 
-            $membership = new HelloassoMembership($item, $data['payments'][0] ?? [], $member);
-            $sid = $h->createDolibarrInvoice($mid, $membership); // Or createDolibarrSubscription (may be configurable ?)
+            case 'Donation':
+                $helloItem = new HelloassoDonation($item, $data['date'], $member);
+                break;
 
-            if ($sid != null) {
-                $h->updateDolibarrThirdparty($mid, $membership->member, $h->getDolibarrThirdparty($member)); // As new HelloassoMembership may update members attributes
-            } else {
-                $sid = "Can't create Membership: ". $membership->toJson();
-                $h->log($sid);
-            }
-
-            $subscriptions[] = $sid;
-        } else {
-            $h->log("Unknown formType: '". $item['type'] ."'");
+            default:
+                $h->log("Unknown formType: '" . $item['type'] . "'");
+                continue 2;
         }
+
+        $items[] = $helloItem;
     }
 
-    return [
-        'member' => $mid,
-        'subscriptions' => $subscriptions,
-    ];
+    // Une seule facture pour toutes les lignes
+    if (!empty($items))
+    {
+        $invoice = $h->createDolibarrInvoice($mid, $items, $data['id']);
+
+        if ($invoice == null) {
+            $invoice = "Can't create invoice for order ". $data['id'];
+            $h->log($invoice);
+        }
+
+        $invoice = $h->getDolibarrInvoice($data['id']);
+
+        return [
+            'member'  => $mid,
+            'items'   => $items,
+            'invoice' => [
+                'id'     => $invoice['id'],
+                'ref'    => $invoice['ref'],
+                'amount' => $invoice['total_ttc'],
+            ],
+        ];
+    }
 }

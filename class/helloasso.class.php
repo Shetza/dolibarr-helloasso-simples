@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 class HelloassoHandler
 {
     private $db;
@@ -256,24 +258,24 @@ class HelloassoHandler
      * @see http://dolibarr/api/index.php/explorer/#!/bankaccounts/bankaccountsAddLine
      * @see http://dolibarr/api/index.php/explorer/#!/bankaccounts/bankaccountsAddLink
      */
-    public function createDolibarrSubscription(int $mid, HelloassoMembership $membership): int
+    public function createDolibarrSubscription(int $mid, HelloassoItem $item): int
     {
         $subscription = [
-            'start_date' => strtotime($membership->date),
-            'end_date'   => strtotime(date('Y-12-31', strtotime($membership->date))),
-            'amount'     => $membership->amount,
+            'start_date' => strtotime($item->date),
+            'end_date'   => strtotime(date('Y-12-31', strtotime($item->date))),
+            'amount'     => $item->amount,
             // 'fk_bank'    => $bankLineId, // Is not set into database, update subscription below...
-            'label'      => "Helloasso - ". $membership->name .' - '. $membership->id,
+            'label'      => "Helloasso - ". $item->name .' - '. $item->id,
         ];
         
         $subscriptionId = $this->callApi('POST', "members/$mid/subscriptions", json_encode($subscription));
         $this->log("Adhésion validée: $subscriptionId");
 
         $bankLine = [
-            'date'   => strtotime($membership->date),
-            'type'   => $membership->method,
-            'amount' => $membership->amount,
-            'label'  => "Helloasso - ". $membership->name .' - '. $membership->id,
+            'date'   => strtotime($item->date),
+            'type'   => $item->method,
+            'amount' => $item->amount,
+            'label'  => "Helloasso - ". $item->name .' - '. $item->id,
         ];
 
         $bankLineId = $this->callApi('POST', "bankaccounts/$this->bid/lines", json_encode($bankLine));
@@ -283,7 +285,7 @@ class HelloassoHandler
             'type'   => 'member',
             'url'    => $this->apiUrl .'adherents/card.php?rowid=',
             'url_id' => $mid,
-            'label'  => $membership->member->fullName,
+            'label'  => $item->member->fullName,
         ];
 
         $bankLinkId = $this->callApi('POST', "bankaccounts/$this->bid/lines/$bankLineId/links", json_encode($bankLink));
@@ -347,7 +349,7 @@ class HelloassoHandler
             }
         }
 
-        return $result[0];
+        return $result[0] ?? null;
     }
 
     /**
@@ -357,16 +359,31 @@ class HelloassoHandler
      * @see http://dolibarr/api/index.php/explorer/#!/invoices/invoicesAddPayment
      * @see http://dolibarr/api/index.php/explorer/#!/invoices/invoicesValidate
      */
-    public function createDolibarrInvoice(int $mid, HelloassoMembership $membership): string|null
+    public function createDolibarrInvoice(int $mid, array $items, string $oid): string|null
     {
-        // Get product to associate with invoice
-        $product = $this->getDolibarrProduct($membership->name);
-        if (empty($product)) {
-            $this->log('('. $membership->name .'): '. json_encode($product));
-            $productId = 9; // @TODO Put this in config (Default don-product id)
-        } else {
-            $productId = $product['id'];
-            $membership->member->status = $product['array_options']['options_status']; // Update member status from product custom field
+        $lines = [];
+        $rang = 1;
+
+        foreach ($items as $item)
+        {
+            // Produit Dolibarr associé
+            $product = $this->getDolibarrProduct($item->name);
+            if (empty($product)) {
+                throw new Exception("Can't find product by label '$item->name'");
+            }
+
+            // Mise à jour éventuelle du statut membre
+            $item->member->status = $product['array_options']['options_status'];
+
+            $lines[] = [
+                'rang'       => (string) $rang++,
+                'qty'        => 1,
+                'fk_product' => $product['id'],
+                'subprice'   => $item->amount,
+                'total_ht'   => $item->amount,
+                'total_ttc'  => $item->amount,
+                'marque_tx'  => 100,
+            ];
         }
 
         $invoice = [
@@ -374,29 +391,20 @@ class HelloassoHandler
             'cond_reglement_id' => "1", // @TODO Put this in config ("A RECEPTION")
             'mode_reglement_id' => "6", // @TODO Put this in config ("CB")
             'fk_account'        => "2", // @TODO Put this in config ("COMPTE")
-            'ref_client'        => "Helloasso - ". $membership->name .' '. $membership->member->period,
-            'note_private'      => "Helloasso ID: ". $membership->id,
-            'lines'             => [
-                [
-                    'rang'          => "1",
-                    'qty'           => 1,
-                    'fk_product'    => $productId,
-                    'subprice'      => $membership->amount,
-                    'total_ht'      => $membership->amount,
-                    'total_ttc'     => $membership->amount,
-                    'marque_tx'     => 100,
-                ]
-            ],
+            'ref_client'        => "Helloasso Order ". $items[0]->member->period,
+            'note_private'      => "Helloasso ID: $oid",
+            'lines'             => $lines,
         ];
+
         $result = $this->callApi('POST', 'invoices', json_encode($invoice));
 
         if (isset($result["error"]) && $result["error"]["code"] >= "300" || empty($result)) {
-            $this->log('('. $membership->member->email .'): '. json_encode($result));
+            $this->log('('. $items[0]->member->email .'): '. json_encode($result));
             return null;
         }
 
         $invoiceId = $result;
-        $this->log("Facture créée: $invoiceId");
+        $this->log("Facture créée: $invoiceId avec ".count($lines)." lignes");
         
         $validate = $this->callApi('POST', "invoices/$invoiceId/validate", json_encode($invoice));
         $this->log('Facture validée: '. json_encode($validate));
@@ -482,16 +490,20 @@ class HelloassoHandler
         curl_setopt($curl, CURLOPT_HTTPHEADER, $httpheader);
 
         $result = curl_exec($curl);
-        if ($result === false) {
-            $this->log(json_encode(['callApi', $method, $this->apiUrl . $url, json_encode([curl_error($curl), curl_errno($curl)])]));
-            throw new Exception(curl_error($curl), curl_errno($curl));
-        }
-
-        $this->log(json_encode(['callApi', $method, $this->apiUrl . $url, json_encode($result)]));
-
-        $result = json_decode($result, true);
+        $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        $this->log(json_encode(['callApi', $method, $this->apiUrl . $url, "HTTP $status", $result]));
         curl_close($curl);
 
-        return $result;
+        if ($status >= 400) {
+            throw new Exception("HTTP $status: $result");
+        }
+
+        if ($result === false) {
+            throw new Exception("HTTP $status: $result", curl_errno($curl));
+        }
+
+        return json_decode($result, true);
+
+
     }
 }

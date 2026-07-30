@@ -24,9 +24,9 @@ class HelloassoMember
         $this->lastName     = $data['lastName'];
         $this->fullName     = trim(strtoupper($this->lastName) .' '. ucfirst($this->firstName));
         $this->phone        = $data['phone'] ?? '';
-        $this->address      = $data['address'];
-        $this->city         = $data['city'];
-        $this->zipCode      = $data['zipCode'];
+        $this->address      = $data['address'] ?? '';
+        $this->city         = $data['city'] ?? '';
+        $this->zipCode      = $data['zipCode'] ?? '';
         $this->country      = substr($data['country'] ?? 'FR',0,2);
         $this->company      = $data['company'] ?? '';
     }

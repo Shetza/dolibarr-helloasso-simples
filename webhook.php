@@ -1,48 +1,102 @@
 <?php
 
-// On définit NOLOGIN avant d’inclure Dolibarr pour ne pas exiger d’authentification
-define('NOLOGIN', 1);       // Pas besoin d’être connecté
-define('NOCSRFCHECK', 1);   // Les webhooks externes n’ont pas de token CSRF
+declare(strict_types=1);
+
+// -----------------------------------------------------------------------------
+// Mode normal : webhook public
+// -----------------------------------------------------------------------------
+
+define('NOLOGIN', 1);
+define('NOCSRFCHECK', 1);
 define('NOTOKENRENEWAL', 1);
 define('NOREQUIREMENU', 1);
 define('NOREQUIREHTML', 1);
 define('NOREQUIREAJAX', 1);
 
-require '../../main.inc.php'; // chemin depuis ton dossier custom/helloasso/
+require '../../main.inc.php';
 
-// Charge ton code de traitement
-require_once __DIR__ . '/class/helloasso.class.php';
-require_once __DIR__ . '/class/HelloassoMember.php';
-require_once __DIR__ . '/class/HelloassoMembership.php';
-require_once __DIR__ . '/lib/helloasso.lib.php';
+require_once __DIR__.'/class/helloasso.class.php';
+require_once __DIR__.'/class/HelloassoItem.php';
+require_once __DIR__.'/class/HelloassoMember.php';
+require_once __DIR__.'/class/HelloassoMembership.php';
+require_once __DIR__.'/class/HelloassoDonation.php';
+require_once __DIR__.'/class/HelloassoRegistration.php';
+require_once __DIR__.'/lib/helloasso.lib.php';
 
-// Récupération du payload brut
-$raw = file_get_contents('php://input');
-$payload = json_decode($raw, true);
+header('Content-Type: application/json');
 
-// Vérif HMAC (optionnelle si configurée)
-$secret = $conf->global->HELLOASSO_WEBHOOK_SECRET ?? '';
-if (!empty($secret)) {
-    $signature = $_SERVER['HTTP_X_HELLOASSO_SIGNATURE'] ?? '';
-    $computed = base64_encode(hash_hmac('sha256', $raw, $secret, true));
-    if ($signature !== $computed) {
-        http_response_code(401);
-        echo json_encode(['error' => 'Invalid signature']);
-        exit;
+if (!empty($_POST['test'])) {
+    // -----------------------------------------------------------------------------
+    // Mode TEST depuis l'interface d'administration
+    // -----------------------------------------------------------------------------
+
+    require_once __DIR__.'/tests/TestParser.php';
+    $scenario = GETPOST('test', 'alphanohtml');
+
+    $payload = TestParser::getScenario($scenario);
+
+    // test only : add timestamp on invoice id
+    $payload['data']['id'] .= '_'.date('YmdHis');
+
+} else {
+    // -------------------------------------------------------------------------
+    // Vrai webhook HelloAsso
+    // -------------------------------------------------------------------------
+
+    $raw = file_get_contents('php://input');
+    $payload = json_decode($raw, true);
+
+    $secret = $conf->global->HELLOASSO_WEBHOOK_SECRET ?? '';
+
+    if (!empty($secret)) {
+
+        $signature = $_SERVER['HTTP_X_HELLOASSO_SIGNATURE'] ?? '';
+
+        $computed = base64_encode(
+            hash_hmac(
+                'sha256',
+                $raw,
+                $secret,
+                true
+            )
+        );
+
+        if (!hash_equals($computed, $signature)) {
+
+            http_response_code(401);
+
+            echo json_encode([
+                'status' => 'ERROR',
+                'result' => 'Invalid signature'
+            ]);
+
+            exit;
+        }
     }
 }
 
-$status = '';
+// -----------------------------------------------------------------------------
+// Traitement commun
+// -----------------------------------------------------------------------------
 
-// Traitement du webhook
 try {
-    $result = helloasso_process_payload($db, $payload);
-    $status = 'OK';
-} catch(Exception $e) {
-    $result = $e->getMessage();
-    $status = 'ERROR';
-}
 
-// Réponse
-header('Content-Type: application/json');
-echo json_encode(['status' => $status, 'result' => $result]);
+    $result = helloasso_process_payload($db, $payload);
+
+    echo json_encode([
+        'status' => 'OK',
+        'result' => $result
+    ], JSON_PRETTY_PRINT);
+
+} catch (Throwable $e) {
+
+    http_response_code(500);
+
+    echo json_encode([
+        'status' => 'ERROR',
+        'result' => $e->getMessage(),
+        'trace'  => $conf->global->MAIN_FEATURES_LEVEL > 0
+            ? explode("\n", $e->getTraceAsString())
+            : null
+    ], JSON_PRETTY_PRINT);
+}

@@ -1,0 +1,753 @@
+@baseUrl = http://localhost:8081
+
+### ADHESION_SYMP
+POST {{baseUrl}}/custom/helloasso/webhook.php
+Content-Type: application/json
+Accept: application/json
+
+{
+  "data":{
+    "payer":{
+      "email": "johann@nonmerci.ovh",
+      "country": "FRA",
+      "firstName": "Johann",
+      "lastName": "XXXXXXX"
+    },
+    "items":[
+      {
+        "name":"Sympathisant.e",
+        "user":{
+          "firstName": "Johann",
+          "lastName": "XXXXXXX"
+        },
+        "priceCategory":"Fixed",
+        "customFields":[
+          {
+            "id":7928970,
+            "name":"Num\u00e9ro de t\u00e9l\u00e9phone",
+            "type":"TextInput",
+            "answer":"0700000000"
+          },
+          {
+            "id":7928971,
+            "name":"Email",
+            "type":"TextInput",
+            "answer":"johann@nonmerci.ovh"
+          },
+          {
+            "id":7928972,
+            "name":"Adresse",
+            "type":"TextInput",
+            "answer":"street"
+          },
+          {
+            "id":7928973,
+            "name":"Code Postal",
+            "type":"TextInput",
+            "answer":"zip"
+          },
+          {
+            "id":7928974,
+            "name":"Ville",
+            "type":"TextInput",
+            "answer":"city"
+          },
+          {
+            "id":8034137,
+            "name":"Quelle est votre tranche d'\u00e2ge? ",
+            "type":"ChoiceList",
+            "answer":"Entre 30 et 39 ans"
+          },
+          {
+            "id":7928968,
+            "name":"S'agit-il d'un renouvellement d'adh\u00e9sion",
+            "type":"YesNo",
+            "answer":"Non"
+          },
+          {
+            "id":7928969,
+            "name":"A quel massif souhaitez-vous \u00eatre rattach\u00e9?",
+            "type":"ChoiceList",
+            "answer":"Auvergne"
+          },
+          {
+            "id":7928979,
+            "name":"Commentaires ",
+            "type":"FreeText",
+            "answer":"MERCI"
+          }
+        ],
+        "id":"Membership_TEST_ADHESION_SYMP",
+        "amount":3000,
+        "type":"Membership",
+        "initialAmount":3000,
+        "state":"Processed"
+      },
+      {
+        "priceCategory":"Fixed",
+        "id":"Membership_TEST_ADHESION_SYMP + Donation",
+        "amount":2000,
+        "type":"Donation",
+        "state":"Processed"
+       }
+    ],
+    "id":"Membership_TEST_ADHESION_SYMP",
+    "date":"2026-07-24T19:14:38.090175+02:00",
+    "formSlug":"adhesion-au-syndicat-simples-2026-2027",
+    "formType":"Membership",
+    "organizationName":"Syndicat SIMPLES",
+    "organizationSlug":"syndicat-simples",
+    "organizationType":"Association1901Rig",
+    "organizationIsUnderColucheLaw":false,
+    "meta":{
+      "createdAt":"2026-07-24T19:13:58.5398382+02:00",
+      "updatedAt":"2026-07-24T19:14:38.47+02:00"
+    },
+    "isAnonymous":false,
+    "isAmountHidden":false
+  },
+  "eventType":"Order"
+}
+
+### ADHESION_SYMP_ORG
+POST {{baseUrl}}/custom/helloasso/webhook.php
+Content-Type: application/json
+Accept: application/json
+
+{
+  "data":{
+    "payer":{
+      "email":"johann_org@nonmerci.ovh",
+      "address":"street",
+      "city":"city",
+      "zipCode":"zip",
+      "country":"FRA",
+      "company":"JOHANN INC.",
+      "firstName":"Johann",
+      "lastName":"XXXXXXX ORG"
+    },
+    "items":[
+      {
+        "name":"Sympathisant.e_organisme_entreprise",
+        "user":{
+          "firstName": "Johann",
+          "lastName": "XXXXXXX ORG"
+        },
+        "priceCategory":"Fixed",
+        "customFields":[
+          {
+            "id":6606332,
+            "name":"S'agit-il d'un renouvellement d'adh\u00e9sion",
+            "type":"YesNo",
+            "answer":"Oui"
+          },
+          {
+            "id":6606333,
+            "name":"A quel massif souhaitez-vous \u00eatre rattach\u00e9?",
+            "type":"ChoiceList",
+            "answer":"HORS MASSIF"
+          },
+          {
+            "id":6606334,
+            "name":"Num\u00e9ro de t\u00e9l\u00e9phone",
+            "type":"TextInput",
+            "answer":"0700000000"
+          },
+          {
+            "id":6606335,
+            "name":"Email",
+            "type":"TextInput",
+            "answer":"johann_org@nonmerci.ovh"
+          },
+          {
+            "id":6606336,
+            "name":"Adresse",
+            "type":"TextInput",
+            "answer":"street"
+          },
+          {
+            "id":6606337,
+            "name":"Code Postal",
+            "type":"TextInput",
+            "answer":"zip"
+          },
+          {
+            "id":6606338,
+            "name":"Ville",
+            "type":"TextInput",
+            "answer":"city"
+          }
+        ],
+        "id":"Membership_TEST_ADHESION_SYMP_ORG",
+        "amount":10000,
+        "type":"Membership",
+        "initialAmount":10000,
+        "state":"Processed"
+      }
+    ],
+    "id":"Membership_TEST_ADHESION_SYMP_ORG",
+    "date":"2025-12-12T12:29:27.1365655+01:00",
+    "formSlug":"adhesion-au-syndicat-simples-2025-2026-2",
+    "formType":"Membership",
+    "organizationName":"Syndicat SIMPLES",
+    "organizationSlug":"syndicat-simples",
+    "organizationType":"Association1901Rig",
+    "organizationIsUnderColucheLaw":false,
+    "meta":{
+       "createdAt":"2025-12-12T12:28:18.1027694+01:00",
+       "updatedAt":"2025-12-12T12:29:27.2477254+01:00"
+    },
+    "isAnonymous":false,
+    "isAmountHidden":false
+  },
+  "eventType":"Order"
+}
+
+### ADH_PROD_PPAM_en_cours_d_installation
+POST {{baseUrl}}/custom/helloasso/webhook.php
+Content-Type: application/json
+Accept: application/json
+
+{
+  "data":{
+    "payer":{
+      "email":"johann_org@nonmerci.ovh",
+      "address":"street",
+      "city":"city",
+      "zipCode":"zip",
+      "country":"FRA",
+      "company":"JOHANN INC.",
+      "firstName":"Johann",
+      "lastName":"XXXXXXX ORG"
+    },
+    "items":[
+      {
+        "name":"Producteur.trice de PPAM EN COURS d'installation _ sans mention SIMPLES",
+        "user":{
+          "firstName": "Johann",
+          "lastName": "XXXXXXX ORG"
+        },
+        "priceCategory":"Fixed",
+        "customFields":[
+          {
+            "id":7928970,
+            "name":"Num\u00e9ro de t\u00e9l\u00e9phone",
+            "type":"TextInput",
+            "answer":"0700000000"
+          },
+          {
+            "id":7928971,
+            "name":"Email",
+            "type":"TextInput",
+            "answer":"johann_org@nonmerci.ovh"
+          },
+          {
+            "id":7928972,
+            "name":"Adresse",
+            "type":"TextInput",
+            "answer":"street"
+          },
+          {
+            "id":7928973,
+            "name":"Code Postal",
+            "type":"TextInput",
+            "answer":"zip"
+          },
+          {
+            "id":7928974,
+            "name":"Ville",
+            "type":"TextInput",
+            "answer":"city"
+          },
+          {
+            "id":8034137,
+            "name":"Quelle est votre tranche d'\u00e2ge? ",
+            "type":"ChoiceList",
+            "answer":"50 et plus ?"
+          },
+          {
+            "id":7928968,
+            "name":"S'agit-il d'un renouvellement d'adh\u00e9sion",
+            "type":"YesNo",
+            "answer":"Non"
+          },
+          {
+            "id":7928969,
+            "name":"A quel massif souhaitez-vous \u00eatre rattach\u00e9?",
+            "type":"ChoiceList",
+            "answer":"Normandie"
+          },
+          {
+            "id":7928975,
+            "name":"Je suis \u00e9galement adh\u00e9rent\u00b7e \u00e0 la FPH (F\u00e9d\u00e9ration des paysan\u00b7nes herboristes)",
+            "type":"YesNo",
+            "answer":"Non"
+          },
+          {
+            "id":7928976,
+            "name":"Je suis \u00e9galement adh\u00e9rent\u00b7e \u00e0 l'AFC (Association Fran\u00e7aise des professionnel\u00b7les de la Cueillette des plantes sauvages)",
+            "type":"YesNo",
+            "answer":"Non"
+          },
+          {
+            "id":7928977,
+            "name":"Statut MSA",
+            "type":"ChoiceList",
+            "answer":"Cotisant.e solidaire"
+          },
+          {
+            "id":7928978,
+            "name":"Quelle part de vos revenus provient de vos ateliers PPAM?",
+            "type":"ChoiceList",
+            "answer":"Moins de 25%"
+          },
+          {
+            "id":8034124,
+            "name":"Nombre d'hectare cultiv\u00e9 en PPAM ?",
+            "type":"ChoiceList",
+            "answer":"Moins de 0,1 ha"
+          },
+          {
+            "id":7928979,
+            "name":"Commentaires ",
+            "type":"FreeText",
+            "answer":"Je viens de d\u00e9marrer et je cueille surtout en sauvage pour le moment."
+          }
+        ],
+        "id":"Membership_TEST_ADH_PROD_PPAM_en_cours_d_installation",
+        "amount":4000,
+        "type":"Membership",
+        "initialAmount":4000,
+        "state":"Processed"
+      },
+      {
+        "priceCategory":"Fixed",
+        "id":"Membership_TEST_ADH_PROD_PPAM_en_cours_d_installation + Donation",
+        "amount":500,
+        "type":"Donation",
+        "state":"Processed"
+      }
+    ],
+    "id":"Membership_TEST_ADH_PROD_PPAM_en_cours_d_installation",
+    "date":"2026-07-14T15:51:28.907757+02:00",
+    "formSlug":"adhesion-au-syndicat-simples-2026-2027",
+    "formType":"Membership",
+    "organizationName":"Syndicat SIMPLES",
+    "organizationSlug":"syndicat-simples",
+    "organizationType":"Association1901Rig",
+    "organizationIsUnderColucheLaw":false,
+    "meta":{
+       "createdAt":"2026-07-14T15:48:49.2543447+02:00",
+       "updatedAt":"2026-07-14T15:51:29.1666667+02:00"
+    },
+    "isAnonymous":false,
+    "isAmountHidden":false
+  },
+  "eventType":"Order"
+}
+
+### ADH_PROD_PPAM
+POST {{baseUrl}}/custom/helloasso/webhook.php
+Content-Type: application/json
+Accept: application/json
+
+{
+  "data":{
+    "payer":{
+      "email":"johann_org@nonmerci.ovh",
+      "address":"street",
+      "city":"city",
+      "zipCode":"zip",
+      "country":"FRA",
+      "company":"JOHANN INC.",
+      "firstName":"Johann",
+      "lastName":"XXXXXXX ORG"
+    },
+    "items":[
+      {
+        "name":"Producteur.trice de PPAM _ sans mention SIMPLES",
+        "user":{
+          "firstName": "Johann",
+          "lastName": "XXXXXXX ORG"
+        },
+        "priceCategory":"Fixed",
+        "customFields":[
+          {
+            "id":7928970,
+            "name":"Num\u00e9ro de t\u00e9l\u00e9phone",
+            "type":"TextInput",
+            "answer":"0700000000"
+          },
+          {
+            "id":7928971,
+            "name":"Email",
+            "type":"TextInput",
+            "answer":"johann_org@nonmerci.ovh"
+          },
+          {
+            "id":7928972,
+            "name":"Adresse",
+            "type":"TextInput",
+            "answer":"street"
+          },
+          {
+            "id":7928973,
+            "name":"Code Postal",
+            "type":"TextInput",
+            "answer":"zip"
+          },
+          {
+            "id":7928974,
+            "name":"Ville",
+            "type":"TextInput",
+            "answer":"city"
+          },
+          {
+            "id":8034137,
+            "name":"Quelle est votre tranche d'\u00e2ge? ",
+            "type":"ChoiceList",
+            "answer":"50 et plus ?"
+          },
+          {
+            "id":7928968,
+            "name":"S'agit-il d'un renouvellement d'adh\u00e9sion",
+            "type":"YesNo",
+            "answer":"Oui"
+          },
+          {
+            "id":7928969,
+            "name":"A quel massif souhaitez-vous \u00eatre rattach\u00e9?",
+            "type":"ChoiceList",
+            "answer":"Velay-Vivarais"
+          },
+          {
+            "id":7928975,
+            "name":"Je suis \u00e9galement adh\u00e9rent\u00b7e \u00e0 la FPH (F\u00e9d\u00e9ration des paysan\u00b7nes herboristes)",
+            "type":"YesNo",
+            "answer":"Oui"
+          },
+          {
+            "id":7928976,
+            "name":"Je suis \u00e9galement adh\u00e9rent\u00b7e \u00e0 l'AFC (Association Fran\u00e7aise des professionnel\u00b7les de la Cueillette des plantes sauvages)",
+            "type":"YesNo",
+            "answer":"Oui"
+          },
+          {
+            "id":7928977,
+            "name":"Statut MSA",
+            "type":"ChoiceList",
+            "answer":"Exploitant.e \u00e0 titre principale"
+          },
+          {
+            "id":7928978,
+            "name":"Quelle part de vos revenus provient de vos ateliers PPAM?",
+            "type":"ChoiceList",
+            "answer":"Entre 25% et 50%"
+          },
+          {
+            "id":8034124,
+            "name":"Nombre d'hectare cultiv\u00e9 en PPAM ?",
+            "type":"ChoiceList",
+            "answer":"Moins de 0,1 ha"
+          },
+          {
+            "id":7928979,
+            "name":"Commentaires ",
+            "type":"FreeText",
+            "answer":"Cueilleuse mais pas productrice de PPAM"
+          }
+        ],
+        "id":"Membership_TEST_ADH_PROD_PPAM",
+        "amount":8000,
+        "type":"Membership",
+        "initialAmount":8000,
+        "state":"Processed"
+      }
+    ],
+    "id":"Membership_TEST_ADH_PROD_PPAM",
+    "date":"2026-07-11T10:07:21.4508177+02:00",
+    "formSlug":"adhesion-au-syndicat-simples-2026-2027",
+    "formType":"Membership",
+    "organizationName":"Syndicat SIMPLES",
+    "organizationSlug":"syndicat-simples",
+    "organizationType":"Association1901Rig",
+    "organizationIsUnderColucheLaw":false,
+    "meta":{
+       "createdAt":"2026-07-11T10:04:27.9121143+02:00",
+       "updatedAt":"2026-07-11T10:07:21.68+02:00"
+    },
+    "isAnonymous":false,
+    "isAmountHidden":false
+  },
+  "eventType":"Order"
+}
+
+### ADH_PROD_T1
+POST {{baseUrl}}/custom/helloasso/webhook.php
+Content-Type: application/json
+Accept: application/json
+
+{
+  "data":{
+    "payer":{
+      "email": "johann@nonmerci.ovh",
+      "country": "FRA",
+      "firstName": "Johann",
+      "lastName": "XXXXXXX"
+    },
+    "items":[
+      {
+        "name":"Producteur.trice de PPAM MENTION SIMPLES-TRANCHE 1",
+        "user":{
+          "firstName": "Johann",
+          "lastName": "XXXXXXX"
+        },
+        "priceCategory":"Fixed",
+        "customFields":[
+          {
+            "id":6034393,
+            "name":"A quel massif \u00eates vous \u00eatre rattach\u00e9?",
+            "type":"ChoiceList",
+            "answer":"Coeur des Alpes"
+          },
+          {
+            "id":6034394,
+            "name":"Num\u00e9ro de t\u00e9l\u00e9phone",
+            "type":"TextInput",
+            "answer":"0700000000"
+          },
+          {
+            "id":6034397,
+            "name":"Code Postal",
+            "type":"TextInput",
+            "answer":"zip"
+          },
+          {
+            "id":6034398,
+            "name":"Ville",
+            "type":"TextInput",
+            "answer":"city"
+          },
+          {
+            "id":6034401,
+            "name":"Statut MSA",
+            "type":"ChoiceList",
+            "answer":"Exploitant.e \u00e0 titre principale"
+          },
+          {
+            "id":6035177,
+            "name":"Je suis \u00e9galement adh\u00e9rent\u00b7e \u00e0 la FPH (F\u00e9d\u00e9ration Fran\u00e7aise des Paysan\u00b7nes Herboristes)",
+            "type":"YesNo",
+            "answer":"Non"
+          },
+          {
+            "id":6035186,
+            "name":"Je suis \u00e9galement adh\u00e9rent\u00b7e \u00e0 l'AFC (Association Fran\u00e7aise des professionnel\u00b7les de la Cueillette de plantes sauvages)",
+            "type":"YesNo",
+            "answer":"Non"
+          }
+        ],
+        "id":"Membership_TEST_ADH_PROD_T1",
+        "amount":13000,
+        "type":"Membership",
+        "initialAmount":13000,
+        "state":"Processed"
+      }
+    ],
+    "id":"Membership_TEST_ADH_PROD_T1",
+    "date":"2026-02-24T15:18:28.491264+01:00",
+    "formSlug":"adhesion-au-syndicat-simples-2025-2026-producteur-ices-avec-mention-simples",
+    "formType":"Membership",
+    "organizationName":"Syndicat SIMPLES",
+    "organizationSlug":"syndicat-simples",
+    "organizationType":"Association1901Rig",
+    "organizationIsUnderColucheLaw":false,
+    "meta":{
+       "createdAt":"2026-02-24T15:16:48.9258953+01:00",
+       "updatedAt":"2026-02-24T15:18:28.5824386+01:00"
+    },
+    "isAnonymous":false,
+    "isAmountHidden":false
+  },
+  "eventType":"Order"
+}
+
+### ADH_PROD_T2
+POST {{baseUrl}}/custom/helloasso/webhook.php
+Content-Type: application/json
+Accept: application/json
+
+{
+  "data":{
+    "payer":{
+      "email": "johann@nonmerci.ovh",
+      "country": "FRA",
+      "firstName": "Johann",
+      "lastName": "XXXXXXX"
+    },
+    "items":[
+      {
+        "name":"Producteur.trice de PPAM MENTION SIMPLES-TRANCHE 2",
+        "user":{
+          "firstName": "Johann",
+          "lastName": "XXXXXXX"
+        },
+        "priceCategory":"Fixed",
+        "customFields":[
+          {
+            "id":6034393,
+            "name":"A quel massif \u00eates vous \u00eatre rattach\u00e9?",
+            "type":"ChoiceList",
+            "answer":"Sud-Ouest"
+          },
+          {
+            "id":6034394,
+            "name":"Num\u00e9ro de t\u00e9l\u00e9phone",
+            "type":"TextInput",
+            "answer":"0700000000"
+          },
+          {
+            "id":6034397,
+            "name":"Code Postal",
+            "type":"TextInput",
+            "answer":"zip"
+          },
+          {
+            "id":6034398,
+            "name":"Ville",
+            "type":"TextInput",
+            "answer":"city"
+          },
+          {
+            "id":6034401,
+            "name":"Statut MSA",
+            "type":"ChoiceList",
+            "answer":"Exploitant.e \u00e0 titre principale"
+          },
+          {
+            "id":6035177,
+            "name":"Je suis \u00e9galement adh\u00e9rent\u00b7e \u00e0 la FPH (F\u00e9d\u00e9ration Fran\u00e7aise des Paysan\u00b7nes Herboristes)",
+            "type":"YesNo",
+            "answer":"Non"
+          },
+          {
+            "id":6035186,
+            "name":"Je suis \u00e9galement adh\u00e9rent\u00b7e \u00e0 l'AFC (Association Fran\u00e7aise des professionnel\u00b7les de la Cueillette de plantes sauvages)",
+            "type":"YesNo",
+            "answer":"Oui"
+          }
+        ],
+        "id":"Membership_TEST_ADH_PROD_T2",
+        "amount":16000,
+        "type":"Membership",
+        "initialAmount":16000,
+        "state":"Processed"
+      }
+    ],
+    "id":"Membership_TEST_ADH_PROD_T2",
+    "date":"2025-12-12T09:49:35.0302807+01:00",
+    "formSlug":"adhesion-au-syndicat-simples-2025-2026-producteur-ices-avec-mention-simples",
+    "formType":"Membership",
+    "organizationName":"Syndicat SIMPLES",
+    "organizationSlug":"syndicat-simples",
+    "organizationType":"Association1901Rig",
+    "organizationIsUnderColucheLaw":false,
+    "meta":{
+       "createdAt":"2025-12-12T09:49:12.5738593+01:00",
+       "updatedAt":"2025-12-12T09:49:35.1216484+01:00"
+    },
+    "isAnonymous":false,
+    "isAmountHidden":false
+  },
+  "eventType":"Order"
+}
+
+### ADH_Associe_Sup
+POST {{baseUrl}}/custom/helloasso/webhook.php
+Content-Type: application/json
+Accept: application/json
+
+{
+  "data":{
+    "payer":{
+      "email": "johann@nonmerci.ovh",
+      "country": "FRA",
+      "firstName": "Johann",
+      "lastName": "XXXXXXX"
+    },
+    "items":[
+      {
+        "name":"ASSOCIE\u00b7E suppl\u00e9mentaire - MENTION SIMPLES-TOUTE TRANCHE CONFONDUE",
+        "user":{
+          "firstName": "Johann",
+          "lastName": "XXXXXXX"
+        },
+        "priceCategory":"Fixed",
+        "customFields":[
+          {
+            "id":6034393,
+            "name":"A quel massif \u00eates vous \u00eatre rattach\u00e9?",
+            "type":"ChoiceList",
+            "answer":"Pyr\u00e9n\u00e9es cathares"
+          },
+          {
+            "id":6034394,
+            "name":"Num\u00e9ro de t\u00e9l\u00e9phone",
+            "type":"TextInput",
+            "answer":"0700000000"
+          },
+          {
+            "id":6034397,
+            "name":"Code Postal",
+            "type":"TextInput",
+            "answer":"zip"
+          },
+          {
+            "id":6034398,
+            "name":"Ville",
+            "type":"TextInput",
+            "answer":"city"
+          },
+          {
+            "id":6034401,
+            "name":"Statut MSA",
+            "type":"ChoiceList",
+            "answer":"Exploitant.e \u00e0 titre principale"
+          },
+          {
+            "id":6035177,
+            "name":"Je suis \u00e9galement adh\u00e9rent\u00b7e \u00e0 la FPH (F\u00e9d\u00e9ration Fran\u00e7aise des Paysan\u00b7nes Herboristes)",
+            "type":"YesNo",
+            "answer":"Non"
+          },
+          {
+            "id":6035186,
+            "name":"Je suis \u00e9galement adh\u00e9rent\u00b7e \u00e0 l'AFC (Association Fran\u00e7aise des professionnel\u00b7les de la Cueillette de plantes sauvages)",
+            "type":"YesNo",
+            "answer":"Oui"
+          }
+        ],
+        "id":"Membership_TEST_ADH_Associe_Sup",
+        "amount":6500,
+        "type":"Membership",
+        "initialAmount":6500,
+        "state":"Processed"
+      }
+    ],
+    "id":"Membership_TEST_ADH_Associe_Sup",
+    "date":"2025-11-06T22:31:57.0045935+01:00",
+    "formSlug":"adhesion-au-syndicat-simples-2025-2026-producteur-ices-avec-mention-simples",
+    "formType":"Membership",
+    "organizationName":"Syndicat SIMPLES",
+    "organizationSlug":"syndicat-simples",
+    "organizationType":"Association1901Rig",
+    "organizationIsUnderColucheLaw":false,
+    "meta":{
+       "createdAt":"2025-11-06T22:31:36.6324044+01:00",
+       "updatedAt":"2025-11-06T22:31:57.0854084+01:00"
+    },
+    "isAnonymous":false,
+    "isAmountHidden":false
+  },
+  "eventType":"Order"
+}

@@ -418,36 +418,56 @@ class HelloassoHandler
         $paymentId = $this->callApi('POST', "invoices/$invoiceId/payments", json_encode($payment));
         $this->log("Paiement crée: $paymentId");
 
-        /**
-        // Get and save pdf invoice from Dolibarr.
-        $invoiceName = $validate['ref'] .'.pdf';
-        $invoiceContent = $this->callApi('GET', 'documents/download', ['modulepart' => 'facture', 'original_file' => $validate['ref'] .'/'. $invoiceName]);
+        // Get and send pdf invoice from Dolibarr.
+        require_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
+        require_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
+        require_once DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php';
 
-        $invoicePath = BASE_PATH .'/dolibarr_receipts/'. $invoiceName;
-        file_put_contents($invoicePath, base64_decode($invoiceContent['content']));
+        global $db, $user, $langs, $conf;
 
-        // Send invoice by email.
-        if ($Membership->Category()->SimplesEmailTemplate) {
-            $template = EmailTemplate::getByCode($Membership->Category()->SimplesEmailTemplate);
-            $email = $template->getEmail();
-            $email->setTo($Membership->Creator()->Email);
-            $email->setBcc(SiteConfig::current_site_config()->ContactEmail);
-            $email->attachFile($invoicePath);
-            $email->populateTemplate([
-                'Membership' => $Membership,
-            ]);
-            $res = $email->send();
-            if ($res === false) {
-                SS_Log::Log(__CLASS__.'.'.__FUNCTION__.'('. $Membership->ID .' / '. $Membership->Creator()->Email .'): '. json_encode($res), SS_Log::ERR);
-                return false;
-            }
+        $templateCode = 'sympathisantes';
+        $sql = "SELECT *
+                FROM ".MAIN_DB_PREFIX."c_email_templates
+                WHERE type_template = 'facture_send'
+                AND label = '".$db->escape($templateCode)."'
+                LIMIT 1";
+
+        $resql = $db->query($sql);
+
+        if (!$resql || !($template = $db->fetch_object($resql))) {
+            $this->log("Modèle d'email facture introuvable: $templateCode");
+            return $validate['ref'];
         }
 
-        $Membership->BillReference = $DolibarrInvoice['id'];
-        $Membership->write();
-        $Membership->addTransactionHistory($invoiceName, "Facture générée et envoyée");
-        */
+        $pdfFile = $conf->facture->dir_output.'/'.$validate['ref'].'/'.$validate['ref'].'.pdf';
+        $this->log("Facture prête à envoi: $pdfFile");
 
+        $email = $member->email;
+        if ($send_all_emails_to = getDolGlobalString('HELLOASSO_SEND_ALL_EMAILS_TO')) {
+            $email = $send_all_emails_to;
+        }
+
+        $mail = new CMailFile(
+            $template->topic,
+            $email,
+            getDolGlobalString('MAIN_MAIL_EMAIL_FROM'),
+            $template->content,
+            [$pdfFile],                 // chemin complet du fichier
+            ['application/pdf'],        // type MIME
+            [$validate['ref'].'.pdf'],  // nom affiché de la pièce jointe
+            '',                         // cc
+            '',                         // bcc
+            0,                          // delivery receipt
+            1                           // message déjà HTML
+        );
+
+        if (!$mail->sendfile()) {
+            $this->log("Impossible d'envoyer la facture par email à: $email");
+            $this->log($mail->error);
+            return $validate['ref'];
+        }
+
+        $this->log("Facture envoyée par email à: $email");
         return $validate['ref'];
     }
 

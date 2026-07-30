@@ -362,6 +362,7 @@ class HelloassoHandler
     {
         $lines = [];
         $rang = 1;
+        $emailTemplate = null;
 
         foreach ($items as $item)
         {
@@ -371,8 +372,8 @@ class HelloassoHandler
                 throw new Exception("Can't find product by label '$item->name'");
             }
 
-            // Mise à jour éventuelle du statut membre
-            $item->member->status = $product['array_options']['options_status'];
+            // Modèle d'email associé au produit
+            $emailTemplate = $emailTemplate ?: $product['array_options']['options_status'];
 
             $lines[] = [
                 'rang'       => (string) $rang++,
@@ -424,24 +425,24 @@ class HelloassoHandler
 
         global $db, $user, $langs, $conf;
 
-        $templateCode = 'sympathisantes';
+        $emailTemplate = $emailTemplate ?: getDolGlobalString('HELLOASSO_DEFAULT_EMAIL_TEMPLATE');
         $sql = "SELECT *
                 FROM ".MAIN_DB_PREFIX."c_email_templates
                 WHERE type_template = 'facture_send'
-                AND label = '".$db->escape($templateCode)."'
+                AND label = '".$db->escape($emailTemplate)."'
                 LIMIT 1";
 
         $resql = $db->query($sql);
 
         if (!$resql || !($template = $db->fetch_object($resql))) {
-            $this->log("Modèle d'email facture introuvable: $templateCode");
+            $this->log("Modèle d'email facture introuvable: $emailTemplate");
             return $validate['ref'];
         }
 
         $pdfFile = $conf->facture->dir_output.'/'.$validate['ref'].'/'.$validate['ref'].'.pdf';
         $this->log("Facture prête à envoi: $pdfFile");
 
-        $email = $member->email;
+        $email = $items[0]->member->email;
         if ($send_all_emails_to = getDolGlobalString('HELLOASSO_SEND_ALL_EMAILS_TO')) {
             $email = $send_all_emails_to;
         }
@@ -522,7 +523,5 @@ class HelloassoHandler
         }
 
         return json_decode($result, true);
-
-
     }
 }

@@ -48,7 +48,12 @@ class HelloassoHandler
      */
     public function findOrMakeDolibarrThirdparty(HelloassoMember $member): int|null
     {
-        if ($result = $this->getDolibarrThirdparty($member)) {
+        $result = null;
+        try {
+            $result = $this->getDolibarrThirdparty($member);
+        } catch(Exception $e) {}
+
+        if ($result) {
             // $this->updateDolibarrThirdparty($result['id'], $member, $result);
             return (int) $result['id'];
         }
@@ -89,7 +94,7 @@ class HelloassoHandler
      * Create Dolibarr Thirdparty from specified member.
      * @see http://dolibarr/api/index.php/explorer/#!/thirdparties/createThirdparties
      */
-    public function createDolibarrThirdparty(HelloassoMember $member): void
+    public function createDolibarrThirdparty(HelloassoMember $member): bool
     {
         $data = [
             'entity'        => '1',
@@ -106,7 +111,7 @@ class HelloassoHandler
         if ($address = $member->address) $data['address'] = $address;
         if ($zipCode = $member->zipCode) $data['zip'] = $zipCode;
         if ($city = $member->city) $data['town'] = $city;
-        if ($country = $member->country) $data['country_code'] = $country;
+        // if ($country = $member->country) $data['country_code'] = $country; // @TODO Issue with 'FR' or 'FRA'
         if ($phone = $member->phone) $data['phone'] = $phone;
 
         // Hook/extension point here ?
@@ -114,7 +119,10 @@ class HelloassoHandler
 
         if (isset($result["error"]) && $result["error"]["code"] >= "300") {
             $this->log('('. $member->email .'): '. json_encode($result));
+            return false;
         }
+
+        return true;
     }
 
     /**
@@ -162,14 +170,19 @@ class HelloassoHandler
      */
     public function findOrMakeDolibarrMember(HelloassoMember $member): int|null
     {
-        if ($result = $this->getDolibarrMember($member)) {
+        $result = null;
+        try {
+            $result = $this->getDolibarrMember($member);
+        } catch(Exception $e) {}
+
+        if ($result) {
             $this->updateDolibarrMember($result, $member);
-            return $result;
+            return (int) $result['id'];
         }
         
         if ($this->createDolibarrMember($member)) {
             $result = $this->getDolibarrMember($member);
-            return $result;
+            return (int) $result['id'];
         }
 
         return null;
@@ -203,7 +216,7 @@ class HelloassoHandler
      * Create Dolibarr Member from specified member.
      * @see http://dolibarr/api/index.php/explorer/#!/members/createMembers
      */
-    public function createDolibarrMember(HelloassoMember $member): void
+    public function createDolibarrMember(HelloassoMember $member): bool
     {
         $data = [
             'morphy' => 'phy',
@@ -225,7 +238,10 @@ class HelloassoHandler
 
         if (isset($result["error"]) && $result["error"]["code"] >= "300") {
             $this->log('('. $member->email .'): '. json_encode($result));
+            return false;
         }
+
+        return true;
     }
 
     /**

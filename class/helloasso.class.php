@@ -425,12 +425,12 @@ class HelloassoHandler
         $sql = "SELECT *
                 FROM ".MAIN_DB_PREFIX."c_email_templates
                 WHERE type_template = 'facture_send'
-                AND label = '".$db->escape($emailTemplate)."'
+                AND label = '".$this->db->escape($emailTemplate)."'
                 LIMIT 1";
 
-        $resql = $db->query($sql);
+        $resql = $this->db->query($sql);
 
-        if (!$resql || !($template = $db->fetch_object($resql))) {
+        if (!$resql || !($template = $this->db->fetch_object($resql))) {
             $this->log("Modèle d'email facture introuvable: $emailTemplate");
             return $validate['ref'];
         }

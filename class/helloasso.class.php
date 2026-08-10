@@ -6,6 +6,7 @@ class HelloassoHandler
 {
     private $db;
     private $apiKey;
+    private $apiEmail;
     private $apiUrl = DOL_MAIN_URL_ROOT .'/api/index.php/'; // @see $dolibarr_main_url_root
     private $uid    = 1;
     private $bid    = 1; // @TODO Put this in config (Bank Account Id)
@@ -22,6 +23,7 @@ class HelloassoHandler
 
         if ($userObj->fetch($this->uid) > 0) {
             $this->apiKey = $userObj->api_key;
+            $this->apiEmail = $userObj->email;
             if (empty($this->apiKey)) {
                 $this->log('Apikey introuvable pour le super admin (id='. $this->uid .')');
                 die;
@@ -419,12 +421,6 @@ class HelloassoHandler
         $this->log("Paiement crée: $paymentId");
 
         // Get and send pdf invoice from Dolibarr.
-        require_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
-        require_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
-        require_once DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php';
-
-        global $db, $user, $langs, $conf;
-
         $emailTemplate = $emailTemplate ?: getDolGlobalString('HELLOASSO_DEFAULT_EMAIL_TEMPLATE');
         $sql = "SELECT *
                 FROM ".MAIN_DB_PREFIX."c_email_templates
@@ -439,6 +435,7 @@ class HelloassoHandler
             return $validate['ref'];
         }
 
+        global $conf;
         $pdfFile = $conf->facture->dir_output.'/'.$validate['ref'].'/'.$validate['ref'].'.pdf';
         $this->log("Facture prête à envoi: $pdfFile");
 
@@ -447,27 +444,12 @@ class HelloassoHandler
             $email = $send_all_emails_to;
         }
 
-        $mail = new CMailFile(
-            $template->topic,
-            $email,
-            getDolGlobalString('MAIN_MAIL_EMAIL_FROM'),
-            $template->content,
-            [$pdfFile],                 // chemin complet du fichier
-            ['application/pdf'],        // type MIME
-            [$validate['ref'].'.pdf'],  // nom affiché de la pièce jointe
-            '',                         // cc
-            '',                         // bcc
-            0,                          // delivery receipt
-            1                           // message déjà HTML
-        );
-
-        if (!$mail->sendfile()) {
-            $this->log("Impossible d'envoyer la facture par email à: $email");
-            $this->log($mail->error);
-            return $validate['ref'];
+        if ($this->helloasso_send_mail($template->topic, $email, $template->content, $pdfFile, 'application/pdf', $validate['ref'].'.pdf')) {
+            $this->log("Facture envoyée par email à: $email");
+        } else {
+            $this->log("Échec de l'envoi de la facture par email à: $email");
         }
 
-        $this->log("Facture envoyée par email à: $email");
         return $validate['ref'];
     }
 
@@ -523,5 +505,85 @@ class HelloassoHandler
         }
 
         return json_decode($result, true);
+    }
+
+    /**
+     * Envoie un email HTML avec pièce jointe optionnelle, via Dolibarr CMailFile.
+     *
+     * @param string $subject
+     * @param string $recipientEmail
+     * @param string $htmlBody
+     * @param string|null $attachmentPath  chemin complet du fichier à joindre
+     * @param string|null $attachmentMime  type MIME de la pièce jointe
+     * @param string|null $attachmentName  nom affiché de la pièce jointe
+     * @return bool true si envoyé, false sinon (voir dol_syslog pour le détail)
+     */
+    function helloasso_send_mail(
+        string $subject,
+        string $recipientEmail,
+        string $htmlBody,
+        ?string $attachmentPath = null,
+        ?string $attachmentMime = null,
+        ?string $attachmentName = null
+    ): bool {
+        require_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
+        require_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
+        require_once DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php';
+
+        $filepaths = $attachmentPath ? [$attachmentPath] : [];
+        $filemimes = $attachmentMime ? [$attachmentMime] : [];
+        $filenames = $attachmentName ? [$attachmentName] : [];
+
+        $mail = new CMailFile(
+            $subject,
+            $recipientEmail,
+            getDolGlobalString('MAIN_MAIL_EMAIL_FROM'),
+            $htmlBody,
+            $filepaths,
+            $filemimes,
+            $filenames,
+            '',                         // cc
+            '',                         // bcc
+            0,                          // delivery receipt
+            1                           // message déjà HTML
+        );
+
+        if (!$mail->sendfile()) {
+            $this->log('Impossible d\'envoyer un email à: '. $recipientEmail .' - '. $mail->error, LOG_ERR);
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Notifie les admins d'une exception survenue dans le traitement du webhook.
+     *
+     * @param Throwable $e
+     * @param array $context éléments additionnels utiles au diagnostic (ex: payload brut)
+     * @return bool
+     */
+    function helloasso_notify_admin_error(Throwable $e, array $context = []): bool
+    {
+        if (empty($this->apiEmail)) {
+            $this->log('Aucune adresse admin configurée, notification d\'erreur non envoyée', LOG_ERR);
+            return false;
+        }
+
+        $body = '<h3>Erreur webhook HelloAsso</h3>';
+        $body .= '<p><strong>Message :</strong> '. htmlspecialchars($e->getMessage()) .'</p>';
+        $body .= '<p><strong>Fichier :</strong> '. htmlspecialchars($e->getFile()) .':'. $e->getLine() .'</p>';
+
+        if (!empty($context)) {
+            $body .= '<p><strong>Contexte :</strong></p><pre>'. htmlspecialchars(json_encode($context, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE)) .'</pre>';
+        }
+
+        $body .= '<p><strong>Trace :</strong></p><pre>'. htmlspecialchars($e->getTraceAsString()) .'</pre>';
+
+        return $this->helloasso_send_mail(
+            'Erreur webhook: '. $e->getMessage(),
+            $this->apiEmail,
+            $body
+        );
     }
 }

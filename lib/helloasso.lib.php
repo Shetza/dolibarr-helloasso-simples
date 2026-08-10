@@ -76,3 +76,9 @@ function helloasso_process_payload($db, $payload)
         ];
     }
 }
+
+function helloasso_notify_admin_error($db, Throwable $e, array $payload = []): bool
+{
+    $h = new HelloassoHandler($db);
+    return $h->helloasso_notify_admin_error($e, $payload);
+}

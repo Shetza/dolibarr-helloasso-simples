@@ -78,20 +78,16 @@ if (!empty($_POST['test'])) {
 // -----------------------------------------------------------------------------
 // Traitement commun
 // -----------------------------------------------------------------------------
-
 try {
-
     $result = helloasso_process_payload($db, $payload);
-
     echo json_encode([
         'status' => 'OK',
         'result' => $result
     ], JSON_PRETTY_PRINT);
-
 } catch (Throwable $e) {
+    helloasso_notify_admin_error($db, $e, $payload);
 
     http_response_code(500);
-
     echo json_encode([
         'status' => 'ERROR',
         'result' => $e->getMessage(),

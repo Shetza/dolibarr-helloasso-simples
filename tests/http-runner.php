@@ -97,7 +97,7 @@ foreach (TestParser::getRequests() as $request) {
         'amount'
     ));
 
-    if ((int)$totalItems === ((int)$totalInvoice*100)) {
+    if ($totalItems === (int) round(((float) $totalInvoice) * 100)) {
         echo GREEN."✓ Invoice total".RESET.PHP_EOL;
     } else {
         echo RED."✗ Invoice total".RESET.PHP_EOL;

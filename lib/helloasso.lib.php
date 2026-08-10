@@ -12,11 +12,22 @@ function helloasso_process_payload($db, $payload)
     // Get Event / only consider Order events.
     if (@$payload['eventType'] !== 'Order') return true;
 
+    // Do not consider 0-total order
+    if ((int)@$payload['data']['amount']['total'] <= 0) return true;
+
     $data = $payload['data'];
 
     // Déjà importé ?
-    $exist = $h->getDolibarrInvoice($data['id']);
-    if (!empty($exist)) return [];
+    $exist = $h->getDolibarrInvoice((string)$data['id']);
+    if (!empty($exist)) {
+        return [
+            'invoice' => [
+                'id'     => $exist['id'],
+                'ref'    => $exist['ref'],
+                'amount' => $exist['total_ttc'],
+            ],
+        ];
+    }
 
     $member = new HelloassoMember($data['payer']);
     $mid    = $h->findOrMakeDolibarrThirdparty($member); // Or findOrMakeDolibarrMember (may be configurable ?)
@@ -56,14 +67,14 @@ function helloasso_process_payload($db, $payload)
     // Une seule facture pour toutes les lignes
     if (!empty($items))
     {
-        $invoice = $h->createDolibarrInvoice($mid, $items, $data['id']);
+        $invoice = $h->createDolibarrInvoice($mid, $items, (string)$data['id']);
 
         if ($invoice == null) {
             $invoice = "Can't create invoice for order ". $data['id'];
             $h->log($invoice);
         }
 
-        $invoice = $h->getDolibarrInvoice($data['id']);
+        $invoice = $h->getDolibarrInvoice((string)$data['id']);
 
         return [
             'member'  => $mid,

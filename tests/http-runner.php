@@ -11,8 +11,8 @@ const CYAN="\033[36m";
 const YELLOW="\033[33m";
 const RESET="\033[0m";
 
-$file = $argv[1] ?? TestParser::FILEPATH;
-$wanted = $argv[2] ?? null;
+$file = TestParser::FILEPATH;
+$wanted = $argv[1] ?? null;
 
 if ($file !== TestParser::FILEPATH) {
     class_alias(TestParser::class, '_TP');
@@ -21,8 +21,8 @@ if ($file !== TestParser::FILEPATH) {
 
 $exit = 0;
 
-foreach (TestParser::getRequests() as $request) {
-
+foreach (TestParser::getRequests() as $request)
+{
     if ($wanted && stripos($request['title'], $wanted) === false) {
         continue;
     }
@@ -91,7 +91,7 @@ foreach (TestParser::getRequests() as $request) {
         $exit = 1;
     }
 
-    $totalInvoice = $json['result']['invoice']['amount'];
+    $totalInvoice = $json['result']['invoice']['amount'] ?? 0;
     $totalItems = array_sum(array_column(
         $payload['data']['items'],
         'amount'

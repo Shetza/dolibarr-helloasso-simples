@@ -1,5 +1,315 @@
 @baseUrl = http://localhost:8081
 
+### PAF_-_VIVEA_-_3_jours
+POST {{baseUrl}}/custom/helloasso/webhook.php
+Content-Type: application/json
+Accept: application/json
+
+{
+  "data":{
+    "payer":{
+      "email": "johann@nonmerci.ovh",
+      "country": "FRA",
+      "firstName": "Johann",
+      "lastName": "XXXXXXX"
+    },
+    "items":[
+      {
+        "name":"ELIGIBLE VIVEA - 3 jours",
+        "user":{
+          "firstName": "Johann",
+          "lastName": "XXXXXXX"
+        },
+        "priceCategory":"Fixed",
+        "customFields":[
+          {
+            "id":8118030,
+            "name":"Code postal  (pour le covoiturage)",
+            "type":"Zipcode",
+            "answer":"zip"
+         },
+         {
+            "id":8118031,
+            "name":"Ville  (pour le covoiturage)",
+            "type":"TextInput",
+            "answer":"city"
+         },
+         {
+            "id":8118035,
+            "name":"Quel \u00e9tat d'avancement de votre projet ou Combien d'ann\u00e9e de production \/ d'activit\u00e9s ?",
+            "type":"FreeText",
+            "answer":"Je suis en cours d'installation (pr\u00e9vue en avril 2027)."
+         },
+         {
+            "id":8118036,
+            "name":"Vos attentes pour cette formation",
+            "type":"FreeText",
+            "answer":"Ma\u00eetriser les diff\u00e9rentes mani\u00e8res de transformer les plantes m\u00e9dicinales."
+         },
+         {
+            "id":8118106,
+            "name":" Avez-vous besoin d\u2019un am\u00e9nagement particulier (condition d\u2019accueil, am\u00e9nagement de la formation, ou des ressources p\u00e9dagogiques...). Si oui merci de contacter Juliette Renaud au 06.07.54.93.11 ou secretariat@syndicat-simples.org",
+            "type":"YesNo",
+            "answer":"Non"
+         },
+         {
+            "id":8118038,
+            "name":"Ai-je une demande \u00e0 faire concernant l'accessibilit\u00e9 pour les personnes en situation de handicap?",
+            "type":"YesNo",
+            "answer":"Non"
+         }
+        ],
+        "id":"Registration_TEST_PAF_-_VIVEA_-_3_jours",
+        "amount":2100,
+        "type":"Registration",
+        "initialAmount":2100,
+        "state":"Processed"
+      }
+    ],
+    "amount":{
+      "total":2100,
+      "vat":0,
+      "discount":0
+    },
+    "id":"Registration_TEST_PAF_-_VIVEA_-_3_jours",
+    "date":"2026-07-30T14:40:54.8196375+02:00",
+    "formSlug":"27-01-12-extractions-vegetales-diverses",
+    "formType":"Event",
+    "organizationName":"Syndicat SIMPLES",
+    "organizationSlug":"syndicat-simples",
+    "organizationType":"Association1901Rig",
+    "organizationIsUnderColucheLaw":false,
+    "meta":{
+       "createdAt":"2026-07-30T14:40:24.7141041+02:00",
+       "updatedAt":"2026-07-30T14:40:54.9+02:00"
+    },
+    "isAnonymous":false,
+    "isAmountHidden":false
+  },
+  "eventType":"Order"
+}
+
+### PAF_-_VIVEA_-_2_jours
+POST {{baseUrl}}/custom/helloasso/webhook.php
+Content-Type: application/json
+Accept: application/json
+
+{
+  "data":{
+    "payer":{
+      "email": "johann@nonmerci.ovh",
+      "country": "FRA",
+      "firstName": "Johann",
+      "lastName": "XXXXXXX"
+    },
+    "items":[
+      {
+        "name":"ELIGIBLE VIVEA - 2 jours",
+        "user":{
+          "firstName": "Johann",
+          "lastName": "XXXXXXX"
+        },
+        "priceCategory":"Fixed",
+        "customFields":[
+          {
+            "id":7821653,
+            "name":"Code postal (pour le covoiturage)",
+            "type":"Zipcode",
+            "answer":"zip"
+         },
+         {
+            "id":7821654,
+            "name":"Ville (pour le covoiturage)",
+            "type":"TextInput",
+            "answer":"city"
+         },
+         {
+            "id":7821655,
+            "name":"Num\u00e9ro de t\u00e9l\u00e9phone (pour le covoiturage)",
+            "type":"Phone",
+            "answer":"0700000000"
+         },
+         {
+            "id":7821656,
+            "name":"Statut au syndicat SIMPLES",
+            "type":"ChoiceList",
+            "answer":"Producteur.ice de PPAM (sans mention SIMPLES)"
+         },
+         {
+            "id":7821657,
+            "name":"Statut VIVEA",
+            "type":"ChoiceList",
+            "answer":"cotisant solidaire"
+         },
+         {
+            "id":7821658,
+            "name":"Date de naissance",
+            "type":"Date",
+            "answer":"31\/12\/1980"
+         },
+         {
+            "id":7821659,
+            "name":"Vos attentes pour cette formation",
+            "type":"FreeText",
+            "answer":"Approfondir mes connaissances n'ayant pas de formation agricole de base."
+         },
+         {
+            "id":7821887,
+            "name":" Avez-vous besoin d\u2019un am\u00e9nagement particulier (condition d\u2019accueil, am\u00e9nagement de la formation, ou des ressources p\u00e9dagogiques...). Si oui merci de contacter Juliette Renaud au 06.07.54.93.11 ou secretariat@syndicat-simples.org",
+            "type":"YesNo",
+            "answer":"Non"
+         },
+         {
+            "id":7821660,
+            "name":"Ai-je une demande \u00e0 faire concernant l'accessibilit\u00e9 pour les personnes en situation de handicap ? ",
+            "type":"YesNo",
+            "answer":"Non"
+         }
+        ],
+        "id":"Registration_TEST_PAF_-_VIVEA_-_2_jours",
+        "amount":1400,
+        "type":"Registration",
+        "initialAmount":1400,
+        "state":"Processed"
+      }
+    ],
+    "amount":{
+      "total":1400,
+      "vat":0,
+      "discount":0
+    },
+    "id":"Registration_TEST_PAF_-_VIVEA_-_2_jours",
+    "date":"2026-07-30T14:13:11.8428698+02:00",
+    "formSlug":"26-10-20-formation-culture-des-ppam",
+    "formType":"Event",
+    "organizationName":"Syndicat SIMPLES",
+    "organizationSlug":"syndicat-simples",
+    "organizationType":"Association1901Rig",
+    "organizationIsUnderColucheLaw":false,
+    "meta":{
+       "createdAt":"2026-07-30T14:12:40.8393978+02:00",
+       "updatedAt":"2026-07-30T14:13:12.0066667+02:00"
+    },
+    "isAnonymous":false,
+    "isAmountHidden":false
+  },
+  "eventType":"Order"
+}
+
+### AUTRE OPCO - 2 joursv
+POST {{baseUrl}}/custom/helloasso/webhook.php
+Content-Type: application/json
+Accept: application/json
+
+{
+  "data":{
+    "payer":{
+      "email": "johann@nonmerci.ovh",
+      "country": "FRA",
+      "firstName": "Johann",
+      "lastName": "XXXXXXX"
+    },
+    "items":[
+      {
+        "name":"AUTRE OPCO - 2 jours",
+        "user":{
+          "firstName": "Johann",
+          "lastName": "XXXXXXX"
+        },
+        "priceCategory":"Free",
+        "customFields":[
+          {
+            "id":8158355,
+            "name":"Num\u00e9ro de t\u00e9l\u00e9phone ",
+            "type":"Phone",
+            "answer":"0700000000"
+          },
+          {
+            "id":8158356,
+            "name":"Code postal ",
+            "type":"Zipcode",
+            "answer":"zip"
+          },
+          {
+            "id":8158357,
+            "name":"Ville ",
+            "type":"TextInput",
+            "answer":"city"
+          },
+          {
+            "id":8158358,
+            "name":"Date de naissance",
+            "type":"Date",
+            "answer":"25\/12\/1980"
+          },
+          {
+            "id":8158359,
+            "name":"Statut Syndicat SIMPLES",
+            "type":"ChoiceList",
+            "answer":"Sympathisant.e"
+          },
+          {
+            "id":8158361,
+            "name":"Vos attentes pour cette formation",
+            "type":"FreeText",
+            "answer":"TEST attentes"
+          },
+          {
+            "id":8158362,
+            "name":" Avez-vous besoin d\u2019un am\u00e9nagement particulier",
+            "type":"YesNo",
+            "answer":"Oui"
+          },
+          {
+            "id":8158363,
+            "name":"Ai-je une demande \u00e0 faire concernant l'accessibilit\u00e9 pour les personnes en situation",
+            "type":"YesNo",
+            "answer":"Non"
+          },
+          {
+            "id":8158364,
+            "name":"Num\u00e9ro de t\u00e9l\u00e9phone",
+            "type":"Phone",
+            "answer":"0700000000"
+          }
+        ],
+        "id":"Registration_TEST_1",
+        "amount":0,
+        "type":"Registration",
+        "initialAmount":0,
+        "state":"Processed"
+      },
+      {
+        "priceCategory":"Fixed",
+        "id":"Membership_TEST_ADHESION_SYMP + Donation",
+        "amount":100,
+        "type":"Donation",
+        "state":"Processed"
+      }
+    ],
+    "amount":{
+      "total":100,
+      "vat":0,
+      "discount":0
+    },
+    "id":188410308,
+    "date":"2026-07-28T13:40:06.0365593+02:00",
+    "formSlug":"formation-test-johann-ne-pas-modifier-ni-supprimer",
+    "formType":"Event",
+    "organizationName":"Syndicat SIMPLES",
+    "organizationSlug":"syndicat-simples",
+    "organizationType":"Association1901Rig",
+    "organizationIsUnderColucheLaw":false,
+    "meta":{
+      "createdAt":"2026-07-28T13:39:49.9667751+02:00",
+      "updatedAt":"2026-07-28T13:40:06.27+02:00"
+    },
+    "isAnonymous":false,
+    "isAmountHidden":false
+  },
+  "eventType":"Order"
+}
+
 ### ADHESION_SYMP
 POST {{baseUrl}}/custom/helloasso/webhook.php
 Content-Type: application/json

@@ -37,6 +37,10 @@ function helloasso_process_payload($db, $payload)
                 $h->updateDolibarrThirdparty($mid, $helloItem->member, $h->getDolibarrThirdparty($member));
                 break;
 
+            case 'Registration':
+                $helloItem = new HelloassoRegistration($item, $data['date'], $member);
+                break;
+
             case 'Donation':
                 $helloItem = new HelloassoDonation($item, $data['date'], $member);
                 break;

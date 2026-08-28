@@ -96,23 +96,24 @@ class HelloassoHandler
      */
     public function createDolibarrThirdparty(HelloassoMember $member): bool
     {
+        $options = [];
+        if (!empty($member->status)) $options['options_statut'] = $member->status;
+        if (!empty($member->massif)) $options['options_massif'] = $member->massif;
+        if (!empty($member->period)) $options['options_cotis']  = $member->period;
+
         $data = [
             'entity'        => '1',
             'email'         => $member->email,
             'name'          => $member->fullName,
             'client'        => 1, // @TODO Put this in config (Prospect / Client : Client)
             'code_client'   => "auto",
-            'array_options' => [
-                'options_statut'    => $member->status,
-                'options_massif'    => $member->massif,
-                'options_cotis'     => $member->period,
-            ],
         ];
         if ($address = $member->address) $data['address'] = $address;
         if ($zipCode = $member->zipCode) $data['zip'] = $zipCode;
         if ($city = $member->city) $data['town'] = $city;
         // if ($country = $member->country) $data['country_code'] = $country; // @TODO Issue with 'FR' or 'FRA'
         if ($phone = $member->phone) $data['phone'] = $phone;
+        if (!empty($options)) $data['array_options'] = $options;
 
         // Hook/extension point here ?
         $result = $this->callApi('POST', 'thirdparties', json_encode($data));

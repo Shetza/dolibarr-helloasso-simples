@@ -21,6 +21,7 @@ require_once __DIR__.'/class/HelloassoMember.php';
 require_once __DIR__.'/class/HelloassoMembership.php';
 require_once __DIR__.'/class/HelloassoDonation.php';
 require_once __DIR__.'/class/HelloassoRegistration.php';
+require_once __DIR__.'/class/HelloassoOption.php';
 require_once __DIR__.'/lib/helloasso.lib.php';
 
 header('Content-Type: application/json');

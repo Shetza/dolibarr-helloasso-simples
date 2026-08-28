@@ -10,6 +10,7 @@ class HelloassoItem implements JsonSerializable
     public $date;
     public $method;
     public $member;
+    public $desc;
 
     public function __construct(array $item, string $date, HelloassoMember $member)
     {

@@ -414,6 +414,7 @@ class HelloassoHandler
                 'rang'       => (string) $rang++,
                 'qty'        => 1,
                 'fk_product' => $product['id'],
+                'desc'       => $item->desc,
                 'subprice'   => $item->amount,
                 'total_ht'   => $item->amount,
                 'total_ttc'  => $item->amount,

@@ -27,7 +27,7 @@ foreach (TestParser::getRequests() as $request)
         continue;
     }
 
-    // test only : add timestamp on invoice id
+    // Test only: add timestamp on invoice id
     $payload = json_decode($request['body'], true, 512, JSON_THROW_ON_ERROR);
     $payload['data']['id'] .= '_'.date('YmdHis');
     $request['body'] = json_encode($payload);
@@ -37,7 +37,7 @@ foreach (TestParser::getRequests() as $request)
     echo CYAN.$request['title'].RESET.PHP_EOL;
     echo CYAN."========================================================".RESET.PHP_EOL;
 
-    echo $request['method'].' '.$request['url'].PHP_EOL;
+    echo $request['method'].' '.$request['url'];
 
     $ch = curl_init($request['url']);
 
@@ -70,11 +70,11 @@ foreach (TestParser::getRequests() as $request)
 
     echo PHP_EOL;
     echo ($status < 400 ? GREEN : RED)."HTTP ".$status.RESET;
-    echo "   ".number_format((microtime(true)-$start)*1000,1)." ms".PHP_EOL.PHP_EOL;
+    echo "   ".number_format((microtime(true)-$start)*1000, 1)." ms".PHP_EOL.PHP_EOL;
 
-    echo YELLOW."Response headers".RESET.PHP_EOL;
-    echo "------------------------------".PHP_EOL;
-    echo trim($headers).PHP_EOL.PHP_EOL;
+    // echo YELLOW."Response headers".RESET.PHP_EOL;
+    // echo "------------------------------".PHP_EOL;
+    // echo trim($headers).PHP_EOL.PHP_EOL;
 
     echo YELLOW."Response body".RESET.PHP_EOL;
     echo "------------------------------".PHP_EOL;
@@ -82,7 +82,11 @@ foreach (TestParser::getRequests() as $request)
     $json = json_decode($body, true);
 
     if (json_last_error() === JSON_ERROR_NONE) {
-        echo json_encode($json, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES).PHP_EOL;
+        echo json_encode(
+            $json,
+            JSON_UNESCAPED_UNICODE |
+            JSON_UNESCAPED_SLASHES
+        ).PHP_EOL;
     } else {
         echo trim($body).PHP_EOL;
     }
@@ -91,18 +95,84 @@ foreach (TestParser::getRequests() as $request)
         $exit = 1;
     }
 
-    $totalInvoice = $json['result']['invoice']['amount'] ?? 0;
-    $totalItems = array_sum(array_column(
-        $payload['data']['items'],
-        'amount'
-    ));
+    /*
+     * ========================================================
+     * Vérification du montant de la commande
+     * ========================================================
+     *
+     * HelloAsso :
+     *
+     * data.amount.total
+     *     = somme des inscriptions
+     *     + somme des options
+     *
+     * Exemple :
+     *
+     * item.amount = 2100
+     * option.amount = 4000
+     * ----------------
+     * total = 6100
+     */
 
-    if ($totalItems === (int) round(((float) $totalInvoice) * 100)) {
+    $totalItems = 0;
+    $totalOptions = 0;
+
+    foreach ($payload['data']['items'] ?? [] as $item) {
+
+        // Montant de l'inscription
+        $totalItems += (int) ($item['amount'] ?? 0);
+
+        // Montant des options sélectionnées
+        foreach ($item['options'] ?? [] as $option) {
+            $totalOptions += (int) ($option['amount'] ?? 0);
+        }
+    }
+
+    $expectedTotal = $totalItems + $totalOptions;
+
+    // Total annoncé par HelloAsso dans le payload
+    $helloAssoTotal = (int) ($payload['data']['amount']['total'] ?? 0);
+
+    // Total de la facture retournée par ton webhook
+    $invoiceAmount = (float) ($json['result']['invoice']['amount'] ?? 0);
+
+    // La facture semble être exprimée en euros,
+    // tandis que les montants HelloAsso sont en centimes.
+    $invoiceTotal = (int) round($invoiceAmount * 100);
+
+    echo PHP_EOL;
+    echo YELLOW."Amount details".RESET.PHP_EOL;
+    echo "------------------------------".PHP_EOL;
+    echo "Items    : ".$totalItems." centimes".PHP_EOL;
+    echo "Options  : ".$totalOptions." centimes".PHP_EOL;
+    echo "Expected : ".$expectedTotal." centimes".PHP_EOL;
+    echo "HA total : ".$helloAssoTotal." centimes".PHP_EOL;
+    echo "Invoice  : ".$invoiceTotal." centimes".PHP_EOL;
+
+    /*
+     * Vérification 1 :
+     * items + options = total HelloAsso
+     */
+    if ($expectedTotal === $helloAssoTotal) {
+        echo GREEN."✓ HelloAsso total (items + options)".RESET.PHP_EOL;
+    } else {
+        echo RED."✗ HelloAsso total (items + options)".RESET.PHP_EOL;
+        echo "Expected : ".$expectedTotal.PHP_EOL;
+        echo "Actual   : ".$helloAssoTotal.PHP_EOL;
+        $exit = 1;
+    }
+
+    /*
+     * Vérification 2 :
+     * items + options = montant de la facture
+     */
+    if ($expectedTotal === $invoiceTotal) {
         echo GREEN."✓ Invoice total".RESET.PHP_EOL;
     } else {
         echo RED."✗ Invoice total".RESET.PHP_EOL;
-        echo "Expected : $totalItems".PHP_EOL;
-        echo "Actual   : ".$totalInvoice.PHP_EOL;
+        echo "Expected : ".$expectedTotal.PHP_EOL;
+        echo "Actual   : ".$invoiceTotal.PHP_EOL;
+        $exit = 1;
     }
 }
 

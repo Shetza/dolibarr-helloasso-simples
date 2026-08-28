@@ -62,6 +62,12 @@ function helloasso_process_payload($db, $payload)
         }
 
         $items[] = $helloItem;
+
+        if ($item['options']) foreach ($item['options'] as $option)
+        {
+            $optionItem = new HelloassoOption($option, $data['date'], $member);
+            $items[] = $optionItem;
+        }
     }
 
     // Une seule facture pour toutes les lignes

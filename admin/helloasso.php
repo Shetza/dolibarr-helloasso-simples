@@ -21,6 +21,7 @@ if ($action == 'update') {
     $api_key = GETPOST('HELLOASSO_API_KEY', 'alpha');
     $default_user_id = GETPOST('HELLOASSO_DEFAULT_USER_ID', 'int');
     $default_donation = GETPOST('HELLOASSO_DEFAULT_DONATION_LABEL', 'alpha');
+    $default_option = GETPOST('HELLOASSO_DEFAULT_OPTION_LABEL', 'alpha');
     $default_email = GETPOST('HELLOASSO_DEFAULT_EMAIL_TEMPLATE', 'alpha');
     $send_all_emails_to = GETPOST('HELLOASSO_SEND_ALL_EMAILS_TO', 'alpha');
 
@@ -28,6 +29,7 @@ if ($action == 'update') {
     dolibarr_set_const($db, "HELLOASSO_API_KEY", $api_key, 'chaine', 0, '', $conf->entity);
     dolibarr_set_const($db, "HELLOASSO_DEFAULT_USER_ID", $default_user_id, 'chaine', 0, '', $conf->entity);
     dolibarr_set_const($db, "HELLOASSO_DEFAULT_DONATION_LABEL", $default_donation, 'chaine', 0, '', $conf->entity);
+    dolibarr_set_const($db, "HELLOASSO_DEFAULT_OPTION_LABEL", $default_option, 'chaine', 0, '', $conf->entity);
     dolibarr_set_const($db, "HELLOASSO_DEFAULT_EMAIL_TEMPLATE", $default_email, 'chaine', 0, '', $conf->entity);
     dolibarr_set_const($db, "HELLOASSO_SEND_ALL_EMAILS_TO", $send_all_emails_to, 'chaine', 0, '', $conf->entity);
 
@@ -39,6 +41,7 @@ $webhook_secret = getDolGlobalString('HELLOASSO_WEBHOOK_SECRET');
 $api_key = getDolGlobalString('HELLOASSO_API_KEY');
 $default_user_id = getDolGlobalInt('HELLOASSO_DEFAULT_USER_ID');
 $default_donation = getDolGlobalString('HELLOASSO_DEFAULT_DONATION_LABEL');
+$default_option = getDolGlobalString('HELLOASSO_DEFAULT_OPTION_LABEL');
 $default_email = getDolGlobalString('HELLOASSO_DEFAULT_EMAIL_TEMPLATE');
 $send_all_emails_to = getDolGlobalString('HELLOASSO_SEND_ALL_EMAILS_TO');
 
@@ -87,6 +90,12 @@ print '</tr>';
 print '<tr class="oddeven">';
 print '<td><label for="HELLOASSO_DEFAULT_DONATION_LABEL">'.$langs->trans("Default Dolibarr Donation Label").'</label></td>';
 print '<td><input type="text" name="HELLOASSO_DEFAULT_DONATION_LABEL" value="'.$default_donation.'" class="quatrevingtpercent"></td>';
+print '</tr>';
+
+// Identifiant option product
+print '<tr class="oddeven">';
+print '<td><label for="HELLOASSO_DEFAULT_OPTION_LABEL">'.$langs->trans("Default Dolibarr Option Label").'</label></td>';
+print '<td><input type="text" name="HELLOASSO_DEFAULT_OPTION_LABEL" value="'.$default_option.'" class="quatrevingtpercent"></td>';
 print '</tr>';
 
 // Code modèle email facture

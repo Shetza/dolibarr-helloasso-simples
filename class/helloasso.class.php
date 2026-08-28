@@ -371,13 +371,29 @@ class HelloassoHandler
     }
 
     /**
-     * Create Invoice, and Payment from current Membership.
-     * 
+     * Create a Dolibarr invoice and register its payment from the current Thirdparty.
+     *
+     * The method creates an invoice in Dolibarr from the membership and the
+     * provided invoice items, validates the invoice, then registers the payment
+     * associated with the order.
+     *
      * @see http://dolibarr/api/index.php/explorer/#!/invoices/createInvoices
-     * @see http://dolibarr/api/index.php/explorer/#!/invoices/invoicesAddPayment
      * @see http://dolibarr/api/index.php/explorer/#!/invoices/invoicesValidate
+     * @see http://dolibarr/api/index.php/explorer/#!/invoices/invoicesAddPayment
+     *
+     * @param int    $mid      Thirdparty ID used to retrieve the customer/member information required to create the invoice.
+     * @param array  $items    Invoice line items to create in Dolibarr.
+     * @param string $oid      Order/payment identifier associated with the invoice.
+     * @param string $formSlug Form slug identifying the origin/form associated with the membership.
+     *
+     * @return string|null The Dolibarr invoice ID on success, or null if the invoice could not be created.
      */
-    public function createDolibarrInvoice(int $mid, array $items, string $oid): string|null
+    public function createDolibarrInvoice(
+        int $mid,
+        array $items,
+        string $oid,
+        string $formSlug
+    ): string|null
     {
         $lines = [];
         $rang = 1;
@@ -410,7 +426,7 @@ class HelloassoHandler
             'cond_reglement_id' => "1", // @TODO Put this in config ("A RECEPTION")
             'mode_reglement_id' => "6", // @TODO Put this in config ("CB")
             'fk_account'        => "2", // @TODO Put this in config ("COMPTE")
-            'ref_client'        => "Helloasso Order ". $items[0]->member->period,
+            'ref_client'        => "Helloasso ". $formSlug,
             'note_private'      => "Helloasso ID: $oid",
             'lines'             => $lines,
         ];

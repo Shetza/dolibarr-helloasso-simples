@@ -67,7 +67,7 @@ function helloasso_process_payload($db, $payload)
     // Une seule facture pour toutes les lignes
     if (!empty($items))
     {
-        $invoice = $h->createDolibarrInvoice($mid, $items, (string)$data['id']);
+        $invoice = $h->createDolibarrInvoice($mid, $items, (string)$data['id'], $data['formSlug']);
 
         if ($invoice == null) {
             $invoice = "Can't create invoice for order ". $data['id'];

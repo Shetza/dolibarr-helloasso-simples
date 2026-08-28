@@ -460,8 +460,10 @@ class HelloassoHandler
             $email = $send_all_emails_to;
         }
 
-        if ($this->helloasso_send_mail($template->topic, $email, $template->content, $pdfFile, 'application/pdf', $validate['ref'].'.pdf')) {
+        $msgid = $this->helloasso_send_mail($template->topic, $email, $template->content, $pdfFile, 'application/pdf', $validate['ref'].'.pdf');
+        if ($msgid) {
             $this->log("Facture envoyée par email à: $email");
+            $this->helloasso_add_task($mid, $invoiceId, $template, $msgid, $email);
         } else {
             $this->log("Échec de l'envoi de la facture par email à: $email");
         }
@@ -541,7 +543,7 @@ class HelloassoHandler
         ?string $attachmentPath = null,
         ?string $attachmentMime = null,
         ?string $attachmentName = null
-    ): bool {
+    ): string|null {
         require_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
         require_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
         require_once DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php';
@@ -566,10 +568,10 @@ class HelloassoHandler
 
         if (!$mail->sendfile()) {
             $this->log('Impossible d\'envoyer un email à: '. $recipientEmail .' - '. $mail->error, LOG_ERR);
-            return false;
+            return null;
         }
 
-        return true;
+        return $mail->msgid;
     }
 
     /**
@@ -601,5 +603,62 @@ class HelloassoHandler
             $this->apiEmail,
             $body
         );
+    }
+
+    /**
+     * Ajoute un évènement de type "mail sent" pour la facture envoyée par email.
+     *
+     * @param int    $mid       ID du tiers Dolibarr concerné.
+     * @param int    $invoiceId ID de la facture Dolibarr concernée.
+     * @param object $template  Modèle d'email Dolibarr utilisé pour l'envoi.
+     * @param string $msgid     Message-ID généré par CMailFile lors de l'envoi.
+     * @param string $email     Adresse email du destinataire.
+     *
+     * @return void
+     */
+    function helloasso_add_task(
+        int $mid,
+        int $invoiceId,
+        object $template,
+        string $msgid,
+        string $email,
+    ): void {
+        require_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
+
+        $actioncomm = new ActionComm($this->db);
+
+        $actioncomm->type_code    = 'AC_OTH_AUTO';
+        $actioncomm->socid        = $mid;
+        $actioncomm->contact_id   = 0;
+        $actioncomm->code         = 'AC_EMAIL';
+        $actioncomm->label        = 'E-mail envoyé par API Dolibarr'; // à '. $member->fullName;
+        $actioncomm->note_private = $template->content;
+
+        $actioncomm->datep        = dol_now();
+        $actioncomm->datef        = $actioncomm->datep;
+        $actioncomm->percentage   = -1;
+
+        $actioncomm->authorid     = $this->uid;
+        $actioncomm->userownerid  = $this->uid;
+
+        // Informations du mail
+        $actioncomm->email_msgid   = $msgid;
+        $actioncomm->email_subject = $template->topic;
+        $actioncomm->email_to      = $email;
+        $actioncomm->email_from    = getDolGlobalString('MAIN_MAIL_EMAIL_FROM');
+
+        // Liaison avec la facture
+        $actioncomm->elementtype = 'invoice';
+        $actioncomm->fk_element  = $invoiceId;
+
+        $user = new User($this->db);
+        $user->fetch($this->uid);
+        $actioncommId = $actioncomm->create($user);
+
+        if ($actioncommId > 0) {
+            $this->log("Événement email créé dans Dolibarr: $actioncommId");
+        } else {
+            $this->log("Impossible de créer l'événement email: ".implode(', ', $actioncomm->errors));
+        }
     }
 }

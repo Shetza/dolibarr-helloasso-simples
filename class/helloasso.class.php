@@ -392,7 +392,8 @@ class HelloassoHandler
         int $mid,
         array $items,
         string $oid,
-        string $formSlug
+        string $formSlug,
+        HelloassoMember $member,
     ): string|null
     {
         $lines = [];
@@ -409,6 +410,9 @@ class HelloassoHandler
 
             // Modèle d'email associé au produit
             $emailTemplate = $emailTemplate ?: $product['array_options']['options_status'];
+
+            // Mise à jour éventuelle du statut membre
+            $member->status = $member->status ?: $product['array_options']['options_status'];
 
             $lines[] = [
                 'rang'       => (string) $rang++,
@@ -435,7 +439,7 @@ class HelloassoHandler
         $result = $this->callApi('POST', 'invoices', json_encode($invoice));
 
         if (isset($result["error"]) && $result["error"]["code"] >= "300" || empty($result)) {
-            $this->log('('. $items[0]->member->email .'): '. json_encode($result));
+            $this->log('('. $member->email .'): '. json_encode($result));
             return null;
         }
 
@@ -473,7 +477,7 @@ class HelloassoHandler
         $pdfFile = $conf->facture->dir_output.'/'.$validate['ref'].'/'.$validate['ref'].'.pdf';
         $this->log("Facture prête à envoi: $pdfFile");
 
-        $email = $items[0]->member->email;
+        $email = $member->email;
         if ($send_all_emails_to = getDolGlobalString('HELLOASSO_SEND_ALL_EMAILS_TO')) {
             $email = $send_all_emails_to;
         }

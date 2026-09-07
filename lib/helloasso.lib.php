@@ -45,7 +45,6 @@ function helloasso_process_payload($db, $payload)
         {
             case 'Membership':
                 $helloItem = new HelloassoMembership($item, $data['date'], $member);
-                $h->updateDolibarrThirdparty($mid, $helloItem->member, $h->getDolibarrThirdparty($member));
                 break;
 
             case 'Registration':
@@ -73,7 +72,8 @@ function helloasso_process_payload($db, $payload)
     // Une seule facture pour toutes les lignes
     if (!empty($items))
     {
-        $invoice = $h->createDolibarrInvoice($mid, $items, (string)$data['id'], $data['formSlug']);
+        $invoice = $h->createDolibarrInvoice($mid, $items, (string)$data['id'], $data['formSlug'], $member);
+        $h->updateDolibarrThirdparty($mid, $member, $h->getDolibarrThirdparty($member));
 
         if ($invoice == null) {
             $invoice = "Can't create invoice for order ". $data['id'];

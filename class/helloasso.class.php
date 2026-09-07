@@ -137,8 +137,8 @@ class HelloassoHandler
 
         // Concat periods (year after year)
         $periods = $thirdparty['array_options']['options_cotis'] ?? '';
-        if(strpos($periods, $member->period) === false) {
-            $periods .= ','. $member->period;
+        if(strpos($periods, $member->period ?: '') === false) {
+            $periods .= ','. $member->period ?: '';
         }
 
         $data = [
